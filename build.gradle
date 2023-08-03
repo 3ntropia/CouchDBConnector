@@ -1,0 +1,128 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'org.sonarqube' version "3.5.0.2730"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name "Artifactory"
+        url "http://mm-maven.madmobile.com/artifactory/mm-internal"
+        allowInsecureProtocol=true
+        credentials {
+            username='runner-reader'
+            password='mmadmin'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:23.0.0'
+    compileOnly 'org.springframework:spring-core:5.3.22'
+    compileOnly 'org.springframework:spring-beans:5.3.22'
+    compileOnly 'org.springframework:spring-context:5.3.22'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.36'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+    compileOnly('org.apache.httpcomponents:httpclient:4.5.13') {
+        exclude group: 'commons-codec', module: 'commons-codec'
+    }
+    compileOnly 'commons-codec:commons-codec:1.15'
+    compileOnly 'org.apache.httpcomponents:fluent-hc:4.5.13'
+    compileOnly 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.12.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3'
+    implementation 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
+    testImplementation 'org.testcontainers:testcontainers:1.17.6'
+    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.7.3') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ["src/test/java"]
+        }
+        resources {
+            srcDirs = ["src/test/resources"]
+        }
+    }
+}
+
+group = 'com.madmobile'
+description = 'marvel-integration'
+sourceCompatibility = JavaVersion.VERSION_17
+
+publishing {
+    repositories {
+        repositories {
+            maven {
+                name "Artifactory"
+                url "http://mm-maven.madmobile.com/artifactory/mm-internal"
+                allowInsecureProtocol = true
+                credentials {
+                    username = System.getenv("artifactory_user")
+                    password = System.getenv("artifactory_password")
+                }
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "${group}"
+            artifactId = "${rootProject.name}"
+            version = "${version}"
+            from components.java
+        }
+    }
+}
+
+test {
+    if (project.property("integrationTestDb") == 'true') {
+        environment("INTEGRATION_DB": project.property('integrationTestDb'))
+        environment("TEST_CONTAINER_DB": project.property('integrationTestContainer'))
+        environment("COUCH_DB_HOST": "localhost")
+        environment("COUCH_DB_PORT": 5984)
+        environment("COUCH_DB_USER": "admin")
+        environment("COUCH_DB_PASS": "admin")
+        environment("COUCH_DB_NAME": "itest-db")
+    }
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "Integration"
+        property "sonar.projectName", "Integration"
+    }
+}
