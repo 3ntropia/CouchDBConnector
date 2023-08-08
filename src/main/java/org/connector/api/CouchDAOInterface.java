@@ -7,7 +7,7 @@ import org.connector.model.Document;
 
 import java.util.List;
 
-public interface CouchDAOInterface<T extends Document> {
+public interface CouchDAOInterface <T extends Document> {
 
     T getById(String id);
 
@@ -29,7 +29,7 @@ public interface CouchDAOInterface<T extends Document> {
 
     void bulkDelete(List<T> toDelete);
 
-    <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz);
+    <T extends Document> List<T> findBySubClass(FindRequest findRequest, Class<T> clazz);
 
     List<T> find(CouchQuery query);
 

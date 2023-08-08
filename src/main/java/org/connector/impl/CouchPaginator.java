@@ -28,14 +28,14 @@ public class CouchPaginator<T extends Document> {
 
     public List<T> next() {
         CouchFindResult<T> results = dao.getCouchFindResult(query, pageSize, bookmark);
-        this.bookmark = results.getBookmark();
-        return results.getResults();
+        this.bookmark = results.bookmark();
+        return results.results();
     }
 
     public List<T> getPage(int page) {
         CouchFindResult<T> results = dao.getCouchFindResult(query, pageSize, bookmark, page);
-        this.bookmark = results.getBookmark();
-        return results.getResults();
+        this.bookmark = results.bookmark();
+        return results.results();
     }
 
     public int getPageSize() {

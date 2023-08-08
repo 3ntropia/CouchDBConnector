@@ -16,7 +16,6 @@
 
 package org.connector.http;
 
-import org.connector.exceptions.CouchDbIntegrationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;

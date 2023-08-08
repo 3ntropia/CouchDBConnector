@@ -2,7 +2,6 @@ package org.connector.impl;
 
 import org.connector.api.DocumentInterface;
 import org.connector.api.DBInterface;
-import org.connector.api.ServerInterface;
 import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
 import org.connector.http.Protocol;
@@ -22,8 +21,7 @@ import org.connector.model.BulkSaveRequest;
 import org.connector.model.CreateIndexResponse;
 import org.connector.model.GetPartitionResponse;
 import org.connector.model.PurgeResponse;
-import org.connector.exceptions.CouchDbIntegrationException;
-import org.connector.exceptions.MarvelIntegrationException;
+import org.connector.exceptions.CouchDBException;
 import org.connector.model.Document;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
@@ -58,7 +56,6 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.client.utils.HttpClientUtils.closeQuietly;
 import static org.connector.util.JSON.toJson;
 import static org.connector.util.ConnectorFunction.wrapEx;
@@ -71,7 +68,7 @@ import static org.connector.util.ConnectorFunction.wrapEx;
  *
  */
 @Slf4j
-public class CouchDBClient implements ServerInterface, DBInterface, DocumentInterface {
+public class CouchDBClient implements DBInterface, DocumentInterface {
 
     private static final String COUCH_ALL_DBS_PATH = "_all_dbs";
     private static final String COUCH_ALL_DOCS_PATH = "_all_docs";
@@ -93,39 +90,14 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     private final boolean isPartitioned;
     private final int bulkMaxSize; //todo use to implement in find requests.
 
-    @Deprecated
-    public CouchDBClient(String databaseName, Protocol protocol, String host, Integer port, String userName, String credential) {
-        this(databaseName, protocol, host, port, userName, credential, 50, true);
-    }
-
-    /**
-     * Main Constructor for this Client.
-     * @deprecated Use {@link CouchDBClient#builder()} instead. Retro compatibility is still supported.
-     */
-    @Deprecated
-    @SuppressWarnings("squid:S107")
-    public CouchDBClient(String databaseName, Protocol protocol, String host, Integer port, String userName, String credential,
-                         int maxConnections, boolean testConnection) {
-        Assert.hasText(databaseName, "Database name cannot be blank or null.");
-        Assert.hasText(host, "Host cannot be blank or null.");
-        Assert.notNull(protocol, "Database protocol cannot be null");
-        Assert.isTrue(maxConnections <= 1, "Max connections must be greater than 1");
-
-        var instance = builder()
-                .url(protocol.getValue(), host, port)
-                .username(userName)
-                .password(credential)
-                .maxConnections(maxConnections)
-                .build();
-        this.baseURI = instance.baseURI;
-        this.database = instance.database;
-        this.httpHost = instance.httpHost;
-        this.httpContext = instance.httpContext;
-        this.httpClient = instance.httpClient;
-        this.isPartitioned = instance.isPartitioned;
-        this.bulkMaxSize = instance.bulkMaxSize;
-        if(testConnection)
-            getInstanceMetaInfo();
+    private CouchDBClient(){
+        this.baseURI = null;
+        this.database = null;
+        this.httpHost = null;
+        this.httpContext = null;
+        this.httpClient = null;
+        this.isPartitioned = false;
+        this.bulkMaxSize = 0;
     }
 
     public CouchDBClient(@NotNull URI uri, @NotNull String database, @NotNull HttpHost host,
@@ -153,7 +125,6 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
                     createDatabase();
             }
         }
-
     }
 
     public static CouchDBClientBuilder builder() {
@@ -211,15 +182,8 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
 
     @Override
     public boolean databaseExists(@NotNull final String databaseName) {
-        try {
-            head(getURI(baseURI, databaseName));
-            return true;
-        } catch (CouchDbIntegrationException e) {
-            if (e.getStatusCode() == SC_NOT_FOUND) {
-                return false;
-            }
-            throw e;
-        }
+        head(getURI(baseURI, databaseName));
+        return true;
     }
 
     @Override
@@ -391,7 +355,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     }
 
     @Override
-    public <T extends Document> Document getDocumentById(@NotNull String docId, Class<T> clazz) {
+    public T getDocumentById(@NotNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, database, docId);
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -476,7 +440,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
                         return EntityUtils.toString(entity, StandardCharsets.UTF_8);
                     } catch (IOException e) {
                         log.error("Error occurred while trying to parse response: {}", response.getEntity(), e);
-                        throw new MarvelIntegrationException("Error parsing response", e);
+                        throw new CouchDBException("Error parsing response", e);
                     }
                 }).orElse(null);
     }
@@ -573,7 +537,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
             return httpClient.execute(httpHost, request, httpContext);
         } catch (IOException e) {
             request.abort();
-            throw new MarvelIntegrationException(e);
+            throw new CouchDBException(e);
         }
     }
 

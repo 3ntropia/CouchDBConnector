@@ -16,6 +16,7 @@ import org.connector.selectors.Selectors;
 import lombok.extern.slf4j.Slf4j;
 import org.connector.util.JSON;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  * @param <T> - the type of the items to be persisted in this DAO
  */
 @Slf4j
-public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOInterface<T> {
+public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOInterface <T> {
 
     /**
      * Type used for deserialization. Built once and cached per DAO
@@ -74,8 +75,8 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
 
     @Override
     public T getById(String id)  {
-        var response = this.client.getDocumentById(id, this.entityClass);
-        return response != null ? response.getDocument() : null;
+         Document document = this.client.getDocumentById(id, entityClass);
+         return document;
     }
 
     @Override
@@ -87,7 +88,6 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
                     .flatMap(result -> result.getDocs().stream())
                     .map(BulkGetResponse.BulkGetEntryDetail::getOk)
                     .filter(doc -> !doc.isDeleted())
-                    .map(DocumentWrapper::getDocument)
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -97,7 +97,6 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
     public List<T> bulkGetByIds(String... ids) {
         return bulkGetByIds(Arrays.asList(ids));
     }
-
 
     @Override
     public List<String> getNotDeletedIds(List<String> ids) {
@@ -156,7 +155,6 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
         var toSave = fromDb.getResults().stream()
                 .flatMap(entry -> entry.getDocs().stream())
                 .map(BulkGetResponse.BulkGetEntryDetail::getOk)
-                .map(x -> (DocumentWrapper<T>) x)
                 .collect(Collectors.toList());
         var result = this.client.bulkDelete(new BulkSaveRequest<>(toSave));
         log.debug("Deletion of documents: [{}] results: [{}]", toSave, result);
@@ -172,9 +170,7 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
     @Override
     public <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz) {
         var findResponse = this.client.find(findRequest, "", clazz);
-        return findResponse.getDocs().stream()
-                .map(DocumentWrapper::getDocument)
-                .collect(Collectors.toList());
+        return new ArrayList<>(findResponse.getDocs());
     }
 
     @Override
@@ -210,9 +206,7 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
     }
 
     protected List<T> unwrapFindResponse(FindResponse<T> findResponse) {
-        return findResponse.getDocs().stream()
-                .map(Document::getDocument)
-                .collect(Collectors.toList());
+        return new ArrayList<>(findResponse.getDocs());
     }
 
 }

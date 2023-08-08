@@ -1,7 +1,7 @@
 package org.connector.util;
 
 
-import org.connector.exceptions.MarvelIntegrationException;
+import org.connector.exceptions.CouchDBException;
 
 import java.util.function.Function;
 
@@ -16,7 +16,7 @@ public interface ConnectorFunction<T, R, E extends Exception> {
             try {
                 return fun.apply(t);
             } catch (Exception e) {
-                throw new MarvelIntegrationException(e);
+                throw new CouchDBException(e);
             }
         };
 

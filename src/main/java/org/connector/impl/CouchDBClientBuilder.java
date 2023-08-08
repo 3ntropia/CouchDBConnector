@@ -1,7 +1,7 @@
 package org.connector.impl;
 
 import org.connector.http.ThrowingInterceptor;
-import org.connector.exceptions.MarvelIntegrationException;
+import org.connector.exceptions.CouchDBException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Consts;
 import org.apache.http.HttpHost;
@@ -171,7 +171,7 @@ public class CouchDBClientBuilder {
             return uriBuilder.build().toString();
         } catch (URISyntaxException e) {
             log.error("Error building uri with {}, {}, {}, {}", protocol, host, port, e);
-            throw new MarvelIntegrationException(e);
+            throw new CouchDBException(e);
         }
     }
 
