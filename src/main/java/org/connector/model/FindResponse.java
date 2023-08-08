@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class FindResponse<T extends Document> {
-    private List<DocumentWrapper<T>> docs;
+    private List<T> docs;
     private String warning;
     private String bookmark;
 }

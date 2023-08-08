@@ -39,7 +39,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.connector.util.JSON;
-import org.connector.util.MarvelFunction;
+import org.connector.util.ConnectorFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.util.Assert;
@@ -61,7 +61,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.client.utils.HttpClientUtils.closeQuietly;
 import static org.connector.util.JSON.toJson;
-import static org.connector.util.MarvelFunction.wrapEx;
+import static org.connector.util.ConnectorFunction.wrapEx;
 
 /**
  * Class used to interact with CouchDB. This client can be configured for both the connection URL details
@@ -512,7 +512,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     }
 
     private <T> T get(@NotNull URI uri,
-                      @NotNull MarvelFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+                      @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             var get = new HttpGet(uri);
             get.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
@@ -522,7 +522,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     }
 
     private <T> T post(@NotNull URI uri, @NotNull String json,
-                       @NotNull MarvelFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+                       @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var post = new HttpPost(uri);
             var entity = new StringEntity(json, "UTF-8");
@@ -534,7 +534,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     }
 
     private <T> T put(@NotNull URI uri, @NotNull String json,
-                      @NotNull MarvelFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+                      @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var put = new HttpPut(uri);
             var entity = new StringEntity(json, "UTF-8");
@@ -546,7 +546,7 @@ public class CouchDBClient implements ServerInterface, DBInterface, DocumentInte
     }
 
     private <T> T delete(@NotNull URI uri,
-                         @NotNull MarvelFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+                         @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var delete = new HttpDelete(uri);
             delete.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());

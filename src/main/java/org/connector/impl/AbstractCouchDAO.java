@@ -14,6 +14,7 @@ import org.connector.model.FindResponse;
 import org.connector.query.IntegrationConstants;
 import org.connector.selectors.Selectors;
 import lombok.extern.slf4j.Slf4j;
+import org.connector.util.JSON;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +50,7 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
         this.client = client;
         this.entityClass = entityClass;
         this.entityType = entityClass.getSimpleName();
-        this.type = JSON.getParameterizedType(DocumentWrapper.class, entityClass);
+        this.type = JSON.getParameterizedType(Document.class, entityClass);
         this.listType = JSON.getParameterizedType(List.class, type);
     }
 
@@ -107,27 +108,21 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
 
     @Override
     public T create(T o) {
-        var toSave = DocumentWrapper.fromDoc(o);
-        var result = this.client.saveDocument(o.getId(), toSave);
-        log.debug("Creation of document: {} status: {}", toSave, result);
+        var result = this.client.saveDocument(o.getId(), o);
+        log.debug("Creation of document: {} status: {}", o, result);
         return o;
     }
 
     @Override
     public List<T> create(List<T> toSave) {
-        var wrapped = toSave.stream()
-                .map(DocumentWrapper::fromDoc)
-                .collect(Collectors.toList());
-        var result = this.client.bulkSave(new BulkSaveRequest<>(wrapped));
+        var result = this.client.bulkSave(new BulkSaveRequest<>(toSave));
         log.debug("Creation of documents: [{}] results: [{}]", toSave, result.getResults());
         return toSave;
     }
 
     @Override
     public T update(T o) {
-        var wrapped = this.client.getDocumentById(o.getId(), this.entityClass);
-        wrapped.setDocument(o);
-        var result = this.client.saveDocument(wrapped);
+        var result = this.client.saveDocument(o);
         log.debug("Update of document: {} results: {}", o, result);
         return o;
     }
@@ -216,7 +211,7 @@ public abstract class AbstractCouchDAO<T extends Document> implements CouchDAOIn
 
     protected List<T> unwrapFindResponse(FindResponse<T> findResponse) {
         return findResponse.getDocs().stream()
-                .map(DocumentWrapper::getDocument)
+                .map(Document::getDocument)
                 .collect(Collectors.toList());
     }
 
