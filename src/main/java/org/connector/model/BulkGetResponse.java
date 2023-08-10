@@ -31,7 +31,7 @@ public class BulkGetResponse<T extends Document> {
     @Data
     @NoArgsConstructor
     public static class BulkGetEntryDetail<T extends Document> {
-        private Document ok;
+        private T ok;
         private BulkGetEntryError error;
 
     }

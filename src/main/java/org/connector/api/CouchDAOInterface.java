@@ -29,7 +29,7 @@ public interface CouchDAOInterface <T extends Document> {
 
     void bulkDelete(List<T> toDelete);
 
-    <T extends Document> List<T> findBySubClass(FindRequest findRequest, Class<T> clazz);
+    <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz);
 
     List<T> find(CouchQuery query);
 

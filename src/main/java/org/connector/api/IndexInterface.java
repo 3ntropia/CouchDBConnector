@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
  */
 interface IndexInterface {
 
-
     @NotNull
     CreateIndexResponse createIndex(@NotNull CreateIndexRequest index, String databaseName);
 

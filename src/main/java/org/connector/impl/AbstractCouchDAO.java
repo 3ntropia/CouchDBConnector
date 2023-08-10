@@ -4,15 +4,12 @@ import com.fasterxml.jackson.databind.JavaType;
 import org.connector.api.DocumentInterface;
 import org.connector.api.CouchDAOInterface;
 import org.connector.query.CouchQuery;
-import org.connector.selectors.Selector;
 import org.connector.model.Document;
 import org.connector.model.BulkGetRequest;
 import org.connector.model.BulkGetResponse;
 import org.connector.model.BulkSaveRequest;
 import org.connector.model.FindRequest;
 import org.connector.model.FindResponse;
-import org.connector.query.IntegrationConstants;
-import org.connector.selectors.Selectors;
 import lombok.extern.slf4j.Slf4j;
 import org.connector.util.JSON;
 
@@ -36,11 +33,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     private final JavaType type;
 
     /**
-     * Type used for deserialization of a bulk GET. Built once and cached per DAO
-     */
-    private final JavaType listType;
-
-    /**
      * The CouchDB client class that interacts over HTTP(S) with CouchDB
      */
     protected final DocumentInterface client;
@@ -52,7 +44,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
         this.entityClass = entityClass;
         this.entityType = entityClass.getSimpleName();
         this.type = JSON.getParameterizedType(Document.class, entityClass);
-        this.listType = JSON.getParameterizedType(List.class, type);
     }
 
     /**
@@ -64,19 +55,9 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
         return (CouchDBClient)client;
     }
 
-    protected JavaType getDeserializationType() {
-        return this.type;
-    }
-
-    protected JavaType getListDeserializationType() {
-        return this.listType;
-    }
-
-
     @Override
     public T getById(String id)  {
-         Document document = this.client.getDocumentById(id, entityClass);
-         return document;
+         return this.client.getDocumentById(id, entityClass);
     }
 
     @Override
@@ -87,7 +68,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
             return response.getResults().stream()
                     .flatMap(result -> result.getDocs().stream())
                     .map(BulkGetResponse.BulkGetEntryDetail::getOk)
-                    .filter(doc -> !doc.isDeleted())
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -134,7 +114,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
         var toSave = fromDb.getResults().stream()
                 .flatMap(entry -> entry.getDocs().stream())
                 .map(BulkGetResponse.BulkGetEntryDetail::getOk)
-                .peek(x->x.setDocument(mapUpdate.get(x.getId())))
+                //.peek(x->x.setDocument(mapUpdate.get(x.getId())))
                 .collect(Collectors.toList());
         var result = this.client.bulkSave(new BulkSaveRequest<>(toSave));
         log.debug("Creation of documents: [{}] results: [{}]", toSave, result.getResults());
@@ -199,10 +179,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
                 .skip(pageSize * page)
                 .bookmark(bookmark)
                 .build(), c.getPartition());
-    }
-
-    protected Selector typeSelector() {
-        return Selectors.fieldEq(IntegrationConstants.COUCH_QUERY_PARAM_TYPE, this.entityType);
     }
 
     protected List<T> unwrapFindResponse(FindResponse<T> findResponse) {

@@ -8,14 +8,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public interface DocumentInterface <T extends Document> {
+public interface DocumentInterface {
 
     CouchHttpHeaders getDocumentInfo(@NotNull String docId);
 
-    T getDocumentById(@NotNull String docId, Class<T> clazz);
-    <T extends Document> Document getDocumentById(@NotNull String docId, boolean revs, Class<T> clazz);
-    <T extends Document> Document getDocumentByRev(@NotNull String docId, String rev, Class<T> clazz);
-    <T extends Document> Document getDocumentRevsInfo(@NotNull String docId, Class<T> clazz);
+    <T extends Document> T getDocumentById(@NotNull String docId, Class<T> clazz);
+    <T extends Document> T getDocumentById(@NotNull String docId, boolean revs, Class<T> clazz);
+    <T extends Document> T getDocumentByRev(@NotNull String docId, String rev, Class<T> clazz);
+    <T extends Document> T getDocumentRevsInfo(@NotNull String docId, Class<T> clazz);
 
     <T extends Document> FindResponse<T> find(FindRequest request, String partition, Class<T> clazz);
 

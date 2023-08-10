@@ -6,15 +6,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        name "Artifactory"
-        url "http://mm-maven.madmobile.com/artifactory/mm-internal"
-        allowInsecureProtocol=true
-        credentials {
-            username='runner-reader'
-            password='mmadmin'
-        }
-    }
 }
 
 dependencies {
@@ -75,32 +66,12 @@ sourceSets {
     }
 }
 
-group = 'com.madmobile'
-description = 'marvel-integration'
-sourceCompatibility = JavaVersion.VERSION_17
+group = 'org.connector'
+description = 'CouchDBConnector'
+sourceCompatibility = JavaVersion.VERSION_19
 
 publishing {
-    repositories {
-        repositories {
-            maven {
-                name "Artifactory"
-                url "http://mm-maven.madmobile.com/artifactory/mm-internal"
-                allowInsecureProtocol = true
-                credentials {
-                    username = System.getenv("artifactory_user")
-                    password = System.getenv("artifactory_password")
-                }
-            }
-        }
-    }
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = "${group}"
-            artifactId = "${rootProject.name}"
-            version = "${version}"
-            from components.java
-        }
-    }
+
 }
 
 test {

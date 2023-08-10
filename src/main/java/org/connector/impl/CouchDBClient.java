@@ -4,7 +4,6 @@ import org.connector.api.DocumentInterface;
 import org.connector.api.DBInterface;
 import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
-import org.connector.http.Protocol;
 import org.connector.model.BulkGetRequest;
 import org.connector.model.BulkGetResponse;
 import org.connector.model.BulkSaveResponse;
@@ -57,6 +56,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.client.utils.HttpClientUtils.closeQuietly;
+import static org.connector.query.IntegrationConstants.*;
 import static org.connector.util.JSON.toJson;
 import static org.connector.util.ConnectorFunction.wrapEx;
 
@@ -69,18 +69,6 @@ import static org.connector.util.ConnectorFunction.wrapEx;
  */
 @Slf4j
 public class CouchDBClient implements DBInterface, DocumentInterface {
-
-    private static final String COUCH_ALL_DBS_PATH = "_all_dbs";
-    private static final String COUCH_ALL_DOCS_PATH = "_all_docs";
-    private static final String COUCH_BULK_GET_PATH = "_bulk_get";
-    private static final String COUCH_BULK_DOCS_PATH = "_bulk_docs";
-    private static final String COUCH_COMPACT_PATH = "_compact";
-    private static final String COUCH_DESIGN_DOC_PATH = "_design";
-    private static final String COUCH_FIND_PATH = "_find";
-    private static final String COUCH_INDEX_PATH = "_index";
-    private static final String COUCH_PARTITION_PATH = "_partition";
-    private static final String COUCH_PURGE_PATH = "_purge";
-    private static final String COUCH_VIEW_PATH = "_view";
 
     private final URI baseURI;
     private final String database;
@@ -355,7 +343,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public T getDocumentById(@NotNull String docId, Class<T> clazz) {
+    public <T extends Document> T getDocumentById(@NotNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, database, docId);
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -363,7 +351,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> Document getDocumentById(@NotNull String docId, boolean revs, Class<T> clazz) {
+    public <T extends Document> T getDocumentById(@NotNull String docId, boolean revs, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs", String.valueOf(revs))));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -371,7 +359,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> Document getDocumentByRev(@NotNull String docId, String rev, Class<T> clazz) {
+    public <T extends Document> T getDocumentByRev(@NotNull String docId, String rev, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -379,7 +367,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> Document getDocumentRevsInfo(@NotNull String docId, Class<T> clazz) {
+    public <T extends Document> T getDocumentRevsInfo(@NotNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs_info", "true")));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
