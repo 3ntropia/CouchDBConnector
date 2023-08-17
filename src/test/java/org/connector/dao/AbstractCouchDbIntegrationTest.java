@@ -12,19 +12,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.connector.util.JSON;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Slf4j
 public abstract class AbstractCouchDbIntegrationTest {
 
     static final String integrationTestEnabled = System.getenv("INTEGRATION_DB");
