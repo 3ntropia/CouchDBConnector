@@ -1,0 +1,7 @@
+function(doc) {
+    if (doc.innerClass !== null) {
+        doc.innerClass.forEach(c => {
+            emit(c._id, doc._id);
+        });
+    }
+}
