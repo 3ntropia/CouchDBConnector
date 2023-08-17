@@ -1,6 +1,6 @@
 package org.connector.api;
 
-import org.connector.impl.CouchFindResult;
+import org.connector.model.CouchFindResult;
 import org.connector.model.FindRequest;
 import org.connector.query.CouchQuery;
 import org.connector.model.Document;

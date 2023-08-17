@@ -258,8 +258,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     @Override
     public boolean indexExists(String indexName) {
         var response = getIndexes(database);
-        return response.getIndexes().stream()
-                .anyMatch(index -> index.getName().equals(indexName));
+        return response.indexes().stream()
+                .anyMatch(index -> index.name().equals(indexName));
     }
 
     @Override

@@ -11,23 +11,17 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@NoArgsConstructor
-public class GetPartitionResponse {
-    @JsonProperty("db_name")
-    private String dbName;
-    @JsonProperty("doc_count")
-    Integer docCount;
-    @JsonProperty("doc_del_count")
-    private Integer docDelCount;
-    private List<Size> sizes;
+public record GetPartitionResponse(
+        @JsonProperty("db_name") String dbName,
+        @JsonProperty("doc_count") Integer docCount,
+        @JsonProperty("doc_del_count") Integer docDelCount,
+        List<Size> sizes) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    public static class Size {
-        private Integer active;
-        private Integer external;
+    public record Size(
+            Integer active,
+            Integer external) {
+
     }
 }

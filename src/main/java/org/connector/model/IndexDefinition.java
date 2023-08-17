@@ -18,19 +18,10 @@ import java.util.stream.Collectors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class IndexDefinition {
-    @Builder.Default
-    private List<Object> fields = Collections.emptyList();
-    @JsonProperty("partial_filter_selector")
-    private Map<String,Object> selector;
+public record IndexDefinition(
+        List<Object> fields,
+        @JsonProperty("partial_filter_selector") Map<String,Object> selector) {
+    public IndexDefinition{
 
-    public boolean equalsToResponse(GetIndexResponse.IndexResponse indexResponse) {
-        var fieldNames = indexResponse.getDef().getFields().stream()
-                .map(JSON::convertToStringMap)
-                .flatMap(stringStringMap -> stringStringMap.keySet().stream()).toList();
-        return new HashSet<>(this.fields).containsAll(fieldNames);
     }
 }

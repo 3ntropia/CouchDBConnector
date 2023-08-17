@@ -1,8 +1,8 @@
 package org.connector.impl;
 
-import com.fasterxml.jackson.databind.JavaType;
 import org.connector.api.DocumentInterface;
 import org.connector.api.CouchDAOInterface;
+import org.connector.model.CouchFindResult;
 import org.connector.query.CouchQuery;
 import org.connector.model.Document;
 import org.connector.model.BulkGetRequest;
@@ -10,7 +10,6 @@ import org.connector.model.BulkGetResponse;
 import org.connector.model.BulkSaveRequest;
 import org.connector.model.FindRequest;
 import org.connector.model.FindResponse;
-import org.connector.util.JSON;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,7 +141,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     @Override
     public <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz) {
         var findResponse = this.client.find(findRequest, "", clazz);
-        return new ArrayList<>(findResponse.getDocs());
+        return new ArrayList<>(findResponse.docs());
     }
 
     @Override
@@ -153,7 +152,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     @Override
     public CouchFindResult<T> getCouchFindResult(FindRequest query, String partition) {
         var response = this.client.find(query, partition, entityClass);
-        return new CouchFindResult<>(unwrapFindResponse(response), response.getBookmark());
+        return new CouchFindResult<>(unwrapFindResponse(response), response.bookmark());
     }
 
     CouchFindResult<T> getCouchFindResult(CouchQuery c, int pageSize, String bookmark) {
@@ -174,7 +173,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     }
 
     protected List<T> unwrapFindResponse(FindResponse<T> findResponse) {
-        return new ArrayList<>(findResponse.getDocs());
+        return new ArrayList<>(findResponse.docs());
     }
 
 }

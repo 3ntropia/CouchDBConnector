@@ -77,7 +77,7 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
                         .build())
                 .build(), "");
         assertNotNull(resp);
-        assertEquals(INDEX, resp.getName());
+        assertEquals(INDEX, resp.name());
     }
 
     @Test
@@ -200,7 +200,7 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     void queryViewsTest() {
         CouchQueryViewResponse test = someDAO.getClient().findView("1", "test", "viewName");
         assertNotNull(test);
-        assertEquals("8", test.getTotalRows());
+        assertEquals("8", test.totalRows());
         assertEquals(8, test.getDeserializedRow().size());
     }
 

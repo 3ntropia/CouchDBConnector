@@ -15,7 +15,7 @@ public class SomeDAO extends AbstractCouchDAO<SomeClass> {
     }
 
     public List<SomeClass> find(FindRequest request, String partition) {
-        return new ArrayList<>(this.client.find(request, partition, this.entityClass).getDocs());
+        return new ArrayList<>(this.client.find(request, partition, this.entityClass).docs());
     }
 
 }

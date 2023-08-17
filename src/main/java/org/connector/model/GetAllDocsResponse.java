@@ -15,29 +15,21 @@ import java.util.List;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@NoArgsConstructor
-public class GetAllDocsResponse {
-    @JsonProperty("total_rows")
-    Long totalRows;
-    Long offset;
-    List<Row> rows;
+public record GetAllDocsResponse(
+        @JsonProperty("total_rows") Long totalRows,
+        Long offset,
+        List<Row> rows) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    public static class Row {
-        Value value;
-        String id;
-        String key;
+    public record Row(
+            Value value,
+            String id,
+            String key) {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    public static class Value {
-        String rev;
+    public record Value(String rev) {
     }
 }

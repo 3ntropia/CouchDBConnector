@@ -10,22 +10,16 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class BulkSaveResponse {
-
-    private List<BulkSaveResult> results;
+public record BulkSaveResponse(
+        List<BulkSaveResult> results) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BulkSaveResult {
-        private String id;
-        private String rev;
-        private String error;
-        private String reason;
+    public record BulkSaveResult(
+            String id,
+            String rev,
+            String error,
+            String reason) {
+
     }
 }

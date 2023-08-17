@@ -17,16 +17,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public abstract class AbstractCouchDbIntegrationTest {
 
     static final String integrationTestEnabled = System.getenv("INTEGRATION_DB");
-    static final Function<List<? extends Document>, List<String>> toIds =
-            couchEntities -> couchEntities.stream()
-                    .map(Document::getId)
-                    .collect(Collectors.toList());
     static CouchDBClient couchDbClient;
     static ParentDAO parentDAO;
     static ChildDAO childDAO;

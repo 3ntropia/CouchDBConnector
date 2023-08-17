@@ -36,18 +36,13 @@ public abstract class Document {
     @JsonProperty("_revs_info")
     private List<RevisionInfo> revisionInfos = new ArrayList<>();
 
-
-    @Data
-    @NoArgsConstructor
-    public static class DocumentRevisions {
-        private int start;
-        private List<String> ids;
+    public record DocumentRevisions (
+            int start,
+            List<String> ids) {
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class RevisionInfo {
-        private String rev;
-        private String status;
+    public record RevisionInfo(
+            String rev,
+            String status) {
     }
 }

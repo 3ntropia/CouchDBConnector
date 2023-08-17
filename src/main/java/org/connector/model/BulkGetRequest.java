@@ -21,15 +21,5 @@ public class BulkGetRequest {
             this.getDocs().add(new BulkGetEntry(id));
         }
     }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    public static class BulkGetEntry {
-        private String id;
-        public BulkGetEntry(String id) {
-            this.id = id;
-        }
-    }
+    public record BulkGetEntry(String id) {}
 }

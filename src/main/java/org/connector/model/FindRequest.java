@@ -4,47 +4,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import lombok.*;
+import lombok.Builder;
 import org.springframework.lang.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Getter
-@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class FindRequest {
-
-    @NonNull
-    @JsonRawValue
-    private String selector;
-    private Integer limit;
-    private Integer skip;
-    @JsonRawValue
-    private String sort;
-    private List<String> fields;
-    @JsonProperty("use_index")
-    private List<String> indexes;
-    private String partition;
-    private String view;
-    private String filter;
-    @Builder.Default
-    private boolean conflicts = false;
-    private String bookmark;
-
-    public void addField(String field) {
-        if (fields == null)
-            fields = new ArrayList<>();
-        fields.add(field);
-    }
-
-    public void addIndex(String index) {
-        if (indexes == null)
-            indexes = new ArrayList<>();
-        indexes.add(index);
-    }
+public record FindRequest(
+        @NonNull @JsonRawValue String selector,
+        Integer limit,
+        Integer skip,
+        @JsonRawValue String sort,
+        List<String> fields,
+        @JsonProperty("use_index") List<String> indexes,
+        String partition,
+        String view,
+        String filter,
+        String bookmark) {
+    private static Boolean conflicts = Boolean.FALSE;
 }

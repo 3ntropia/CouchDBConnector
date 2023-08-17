@@ -43,16 +43,14 @@ import java.util.Map;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@NoArgsConstructor
-public class DesignDocument {
-    @JsonProperty("_id")
-    private String id;
-    private Map<String,Map<String,String>> views;
-    private Map<String,String> updates;
-    private Map<String,String> filters;
-    @JsonProperty("validate_doc_update")
-    private String validateDocUpdate;
-    private String language;
+public record DesignDocument(
+        @JsonProperty("_id")
+        String id,
+        Map<String,Map<String,String>> views,
+        Map<String,String> updates,
+        Map<String,String> filters,
+        @JsonProperty("validate_doc_update")
+        String validateDocUpdate,
+        String language) {
 
 }

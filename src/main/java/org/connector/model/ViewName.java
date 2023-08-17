@@ -1,14 +1,5 @@
 package org.connector.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+public record ViewName(ViewMap viewName) {
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class ViewName {
-    private ViewMap viewName;
 }

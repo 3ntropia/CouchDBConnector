@@ -38,13 +38,12 @@ public class BulkGetResponse<T extends Document> {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    @Data
-    @NoArgsConstructor
-    public static class BulkGetEntryError {
-        private String id;
-        @JsonProperty("rev")
-        private String revision;
-        private String error;
-        private String reason;
+    public record BulkGetEntryError(
+            String id,
+            @JsonProperty("rev")
+            String revision,
+            String error,
+            String reason) {
+
     }
 }

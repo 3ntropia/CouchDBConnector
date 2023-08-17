@@ -10,15 +10,11 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class CreateIndexRequest {
-    @Builder.Default
-    private IndexDefinition index = new IndexDefinition();
-    private String ddoc;
-    private String name;
-    @Builder.Default
-    private String type = "json";
-    private Boolean partitioned;
+public record CreateIndexRequest(
+        IndexDefinition index,
+        String ddoc,
+        String name,
+        String type,
+        Boolean partitioned) {
+    
 }

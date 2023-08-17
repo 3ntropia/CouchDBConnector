@@ -1,6 +1,4 @@
-package org.connector.impl;
-
-import org.connector.model.Document;
+package org.connector.model;
 
 import java.util.List;
 

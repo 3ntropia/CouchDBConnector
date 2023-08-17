@@ -2,15 +2,14 @@ package org.connector.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-@NoArgsConstructor
-public class CreateIndexResponse {
-    private String result;
-    private String id;
-    private String name;
+@Builder
+public record CreateIndexResponse(
+        String result,
+        String id,
+        String name) {
+
 }

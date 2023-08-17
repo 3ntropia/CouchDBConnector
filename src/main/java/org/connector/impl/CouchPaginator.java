@@ -1,5 +1,6 @@
 package org.connector.impl;
 
+import org.connector.model.CouchFindResult;
 import org.connector.query.CouchQuery;
 import org.connector.model.Document;
 

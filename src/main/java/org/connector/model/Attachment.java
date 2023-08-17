@@ -26,69 +26,13 @@ import lombok.experimental.SuperBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@SuperBuilder(toBuilder = true)
-@ToString
-@Getter
-@Setter
-@NoArgsConstructor
-public class Attachment {
-	
-	private String data;
-	@JsonProperty("content_type")
-	private String contentType;
-	private int revpos;
-	private String digest;
-	private long length;
-	private boolean stub;
-	
-	/**
-	 * @param data The base64 encoded data of the attachment.
-	 * @param contentType The Content-Type of the attachment.
-	 */
-	public Attachment(String data, String contentType) {
-		this.data = data;
-		this.contentType = contentType;
-	}
-	
-	// Getter
+public record Attachment(
+		String data,
+		@JsonProperty("content_type")
+				String contentType,
+		int revpos,
+		String digest,
+		long length,
+		boolean stub) {
 
-	/**
-	 * @return The base64 encoded data of the attachment.
-	 */
-	public String getData() {
-		return data;
-	}
-
-	public String getContentType() {
-		return contentType;
-	}
-
-	public int getRevpos() {
-		return revpos;
-	}
-
-	public String getDigest() {
-		return digest;
-	}
-
-	public long getLength() {
-		return length;
-	}
-
-	public boolean isStub() {
-		return stub;
-	}
-	
-	// Setter
-	
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	/**
-	 * @param data The base64 encoded data of the attachment.
-	 */
-	public void setData(String data) {
-		this.data = data;
-	}
 }
