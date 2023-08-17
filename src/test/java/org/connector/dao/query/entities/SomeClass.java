@@ -7,12 +7,17 @@ import lombok.Setter;
 
 import java.util.List;
 
+import static org.connector.dao.ConstantTest.INMUTABLE_STRING;
+
+
 @Getter
 @Setter
 @JsonIgnoreProperties
 public class SomeClass extends Document {
     private String field;
     private String extraField;
+
+    private final String INMUTABLE = INMUTABLE_STRING;
     private List<InnerClass> innerClass;
 
     public SomeClass() {

@@ -30,12 +30,8 @@ public abstract class CouchQuery {
     private String view;
     private String filter;
 
-    public static CollectionCondition.And _and() {
+    public static CollectionCondition.And and() {
         return new CollectionCondition.And();
-    }
-
-    public CollectionCondition.And and() {
-        return track(new CollectionCondition.And());
     }
 
     /**
@@ -47,33 +43,6 @@ public abstract class CouchQuery {
         return new CollectionCondition.Or();
     }
 
-    @Deprecated
-    public static CouchQuery _elementMatch(String array, String field, String value) {
-        return new ElementMatch(array).condition(field, value);
-    }
-
-    @Deprecated
-    public static CouchQuery _elementMatch(String array, String value) {
-        return new ElementMatch(array, value);
-    }
-
-    @Deprecated
-    public static CouchQuery _elementMatch(String array) {
-        return new ElementMatch(array);
-    }
-
-    @Deprecated
-    public static StringCondition _notNullCondition(String field, String condition) {
-        if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(condition))
-            return new StringCondition(field, condition);
-        return null;
-    }
-
-    @Deprecated
-    public static StringCondition _condition(String field, String condition) {
-        return new StringCondition(field, condition);
-    }
-
     public <T extends AbstractCouchDAO<?>> CouchPaginator getPaginator(T dao) {
         if (paginator == null) {
             paginator = new CouchPaginator(this, dao);
@@ -83,11 +52,6 @@ public abstract class CouchQuery {
 
     public CollectionCondition.Or or() {
         return track(new CollectionCondition.Or());
-    }
-
-    @Deprecated
-    public CouchQuery elementMatch(String array) {
-        return track(new ElementMatch(array));
     }
 
     public CouchQuery elementMatch(String array, String value) {

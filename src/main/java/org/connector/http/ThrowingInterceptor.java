@@ -16,17 +16,16 @@
 
 package org.connector.http;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestLine;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpContext;
+import org.connector.exceptions.CouchDBException;
 
 import java.io.IOException;
 
-@Slf4j
 public class ThrowingInterceptor implements HttpResponseInterceptor {
 
     @Override
@@ -45,13 +44,7 @@ public class ThrowingInterceptor implements HttpResponseInterceptor {
                 if (response.getEntity() != null) {
                     reason = new String(response.getEntity().getContent().readAllBytes());
                 }
-                var couchDbIntegrationException = new CouchDbIntegrationException(
-                        response.getStatusLine().getStatusCode(),
-                        requestLine.getMethod(),
-                        requestLine.getUri(),
-                        reason);
-                log.error("Error occurred while executing http request: {}", couchDbIntegrationException);
-                throw couchDbIntegrationException;
+                throw new CouchDBException(reason);
         }
     }
 }

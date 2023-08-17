@@ -30,7 +30,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContexts;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 import java.net.URI;
@@ -41,18 +41,17 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Slf4j
 public class CouchDBClientBuilder {
 
     private final CouchDBClientProperties properties = new CouchDBClientProperties();
 
-    public @NotNull CouchDBClientBuilder properties(@NotNull CouchDBClientProperties properties) {
+    public @NonNull CouchDBClientBuilder properties(@NonNull CouchDBClientProperties properties) {
         Assert.notNull(properties, "Properties must not be null.");
         this.properties.copy(properties);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder url(@NotNull String url) {
+    public @NonNull CouchDBClientBuilder url(@NonNull String url) {
         Assert.hasText(url, "Url must not be null nor empty.");
         this.properties.setUrl(url);
         return this;
@@ -61,34 +60,34 @@ public class CouchDBClientBuilder {
     /**
      * If protocol is empty http is used by default.
      */
-    public @NotNull CouchDBClientBuilder url(String protocol,
-                                             @NotNull String host,
-                                             @NotNull Integer port) {
+    public @NonNull CouchDBClientBuilder url(String protocol,
+                                             @NonNull String host,
+                                             @NonNull Integer port) {
         Assert.hasText(host, "Host must not be null nor empty.");
 
         this.properties.setUrl(resolveUrlString(protocol, host, port));
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder database(@NotNull String database) {
+    public @NonNull CouchDBClientBuilder database(@NonNull String database) {
         Assert.hasText(database, "Database name cannot be blank or null.");
         this.properties.setDatabase(database);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder username(@NotNull String username) {
+    public @NonNull CouchDBClientBuilder username(@NonNull String username) {
         Assert.hasText(username, "Username must not be null nor empty.");
         this.properties.setUsername(username);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder password(@NotNull String password) {
+    public @NonNull CouchDBClientBuilder password(@NonNull String password) {
         Assert.hasText(password, "Password must not be null nor empty.");
         this.properties.setPassword(password);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder bulkMaxSize(@NotNull Integer bulkMaxSize) {
+    public @NonNull CouchDBClientBuilder bulkMaxSize(@NonNull Integer bulkMaxSize) {
         Assert.notNull(bulkMaxSize, "BulkMaxSize must not be null.");
         Assert.isTrue(10 <= bulkMaxSize && bulkMaxSize <= 100000,
                 "BulkMaxSize must be greaterEq than 10 and lesserEq than 100000.");
@@ -96,38 +95,38 @@ public class CouchDBClientBuilder {
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder maxConnections(@NotNull Integer maxConnections) {
+    public @NonNull CouchDBClientBuilder maxConnections(@NonNull Integer maxConnections) {
         Assert.notNull(maxConnections, "MaxConnections must not be null.");
         Assert.isTrue(1 <= maxConnections, "MaxConnections must greater than 1.");
         this.properties.setMaxConnections(maxConnections);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder defaultPartitioned(@NotNull Boolean defaultPartitioned) {
+    public @NonNull CouchDBClientBuilder defaultPartitioned(@NonNull Boolean defaultPartitioned) {
         Assert.notNull(defaultPartitioned, "Default Partitioned must not be null.");
         this.properties.setDefaultPartitioned(defaultPartitioned);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder testConnection(@NotNull Boolean testConnection) {
+    public @NonNull CouchDBClientBuilder testConnection(@NonNull Boolean testConnection) {
         Assert.notNull(testConnection, "Test Connection must not be null.");
         this.properties.setTestConnection(testConnection);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder initIndexesFromFiles(@NotNull Boolean initIndexesFromFiles) {
+    public @NonNull CouchDBClientBuilder initIndexesFromFiles(@NonNull Boolean initIndexesFromFiles) {
         Assert.notNull(initIndexesFromFiles, "initIndexesFromFiles must not be null.");
         this.properties.setInitIndexesFromFiles(initIndexesFromFiles);
         return this;
     }
 
-    public @NotNull CouchDBClientBuilder createDatabase(@NotNull Boolean createDatabase) {
+    public @NonNull CouchDBClientBuilder createDatabase(@NonNull Boolean createDatabase) {
         Assert.notNull(createDatabase, "createDatabase must not be null.");
         this.properties.setCreateDatabase(createDatabase);
         return this;
     }
 
-    public @NotNull CouchDBClient build() {
+    public @NonNull CouchDBClient build() {
         var uri = URI.create(ifNotNull(properties.getUrl(), "Url must be configured (can not be null)"));
         var host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
         var context = getHttpContext(
@@ -141,7 +140,7 @@ public class CouchDBClientBuilder {
                 properties.isTestConnection(), properties.isInitIndexesFromFiles());
     }
 
-    private @NotNull HttpContext getHttpContext(@NotNull HttpHost host, @NotNull String username, @NotNull String password) {
+    private @NonNull HttpContext getHttpContext(@NonNull HttpHost host, @NonNull String username, @NonNull String password) {
         AuthCache authCache = new BasicAuthCache();
         authCache.put(host, new BasicScheme());
         HttpContext context = new BasicHttpContext();
@@ -150,7 +149,7 @@ public class CouchDBClientBuilder {
         return context;
     }
 
-    private @NotNull CredentialsProvider getCredentialProvider(@NotNull String username, @NotNull String password) {
+    private @NonNull CredentialsProvider getCredentialProvider(@NonNull String username, @NonNull String password) {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
                 new UsernamePasswordCredentials(username, password));
@@ -170,12 +169,11 @@ public class CouchDBClientBuilder {
         try {
             return uriBuilder.build().toString();
         } catch (URISyntaxException e) {
-            log.error("Error building uri with {}, {}, {}, {}", protocol, host, port, e);
             throw new CouchDBException(e);
         }
     }
 
-    private @NotNull HttpClient getHttpClient() {
+    private @NonNull HttpClient getHttpClient() {
         try {
             var ccm = new PoolingHttpClientConnectionManager(getRegistry());
             ccm.setDefaultMaxPerRoute(this.properties.getMaxConnections());

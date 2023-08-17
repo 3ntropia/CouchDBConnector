@@ -1,8 +1,7 @@
 package org.connector.api;
 
-import org.connector.impl.CouchFindResult;
 import org.connector.model.*;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.net.URI;
@@ -13,15 +12,15 @@ public interface DBInterface extends IndexInterface {
 
     int createDatabase();
 
-    int createDatabase(@NotNull final String databaseName);
+    int createDatabase(@NonNull final String databaseName);
 
     int deleteDatabase();
 
-    int deleteDatabase(@NotNull final String databaseName);
+    int deleteDatabase(@NonNull final String databaseName);
 
-    boolean databaseExists(@NotNull final String databaseName);
+    boolean databaseExists(@NonNull final String databaseName);
 
-    GetDatabaseInfoResponse getDatabaseInfo(@NotNull final String databaseName);
+    GetDatabaseInfoResponse getDatabaseInfo(@NonNull final String databaseName);
 
     PurgeResponse purge(String database, String id, Collection<String> revisions);
 
@@ -33,9 +32,9 @@ public interface DBInterface extends IndexInterface {
 
     List<String> getAllDbs();
 
-    GetPartitionResponse getPartitionInfo(String database, @NotNull String partition);
+    GetPartitionResponse getPartitionInfo(String database, @NonNull String partition);
 
-    @NotNull URI getPartitionURI(@NotNull String dbName, @NotNull String partition);
+    @NonNull URI getPartitionURI(@NonNull String dbName, @NonNull String partition);
 
     GetAllDocsResponse getAllDocs(@Nullable String partition);
 

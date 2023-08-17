@@ -20,7 +20,8 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Document {
+@AllArgsConstructor
+public abstract class Document {
     @JsonProperty("_id")
     private String id;
     @JsonProperty("_rev")

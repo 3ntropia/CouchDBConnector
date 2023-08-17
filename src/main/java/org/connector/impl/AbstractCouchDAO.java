@@ -10,7 +10,6 @@ import org.connector.model.BulkGetResponse;
 import org.connector.model.BulkSaveRequest;
 import org.connector.model.FindRequest;
 import org.connector.model.FindResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.connector.util.JSON;
 
 import java.util.ArrayList;
@@ -24,13 +23,12 @@ import java.util.stream.Collectors;
  *
  * @param <T> - the type of the items to be persisted in this DAO
  */
-@Slf4j
 public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOInterface <T> {
 
     /**
      * Type used for deserialization. Built once and cached per DAO
      */
-    private final JavaType type;
+    //private final JavaType type;
 
     /**
      * The CouchDB client class that interacts over HTTP(S) with CouchDB
@@ -43,7 +41,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
         this.client = client;
         this.entityClass = entityClass;
         this.entityType = entityClass.getSimpleName();
-        this.type = JSON.getParameterizedType(Document.class, entityClass);
+        //this.type = JSON.getParameterizedType(Document.class, entityClass);
     }
 
     /**
@@ -88,21 +86,18 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     @Override
     public T create(T o) {
         var result = this.client.saveDocument(o.getId(), o);
-        log.debug("Creation of document: {} status: {}", o, result);
         return o;
     }
 
     @Override
     public List<T> create(List<T> toSave) {
         var result = this.client.bulkSave(new BulkSaveRequest<>(toSave));
-        log.debug("Creation of documents: [{}] results: [{}]", toSave, result.getResults());
         return toSave;
     }
 
     @Override
     public T update(T o) {
         var result = this.client.saveDocument(o);
-        log.debug("Update of document: {} results: {}", o, result);
         return o;
     }
 
@@ -117,7 +112,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
                 //.peek(x->x.setDocument(mapUpdate.get(x.getId())))
                 .collect(Collectors.toList());
         var result = this.client.bulkSave(new BulkSaveRequest<>(toSave));
-        log.debug("Creation of documents: [{}] results: [{}]", toSave, result.getResults());
         return toUpdate;
     }
 
@@ -125,7 +119,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     public void delete(String id) {
         var toDelete = this.client.getDocumentById(id, this.entityClass);
         var result = this.client.deleteDocument(toDelete.getId(), toDelete.getRev());
-        log.debug("Deletion of document: {} results: {}", toDelete, result);
     }
 
     @Override
@@ -137,7 +130,6 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
                 .map(BulkGetResponse.BulkGetEntryDetail::getOk)
                 .collect(Collectors.toList());
         var result = this.client.bulkDelete(new BulkSaveRequest<>(toSave));
-        log.debug("Deletion of documents: [{}] results: [{}]", toSave, result);
     }
 
 

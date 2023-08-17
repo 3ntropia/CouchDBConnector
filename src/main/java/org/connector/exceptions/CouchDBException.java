@@ -1,7 +1,5 @@
 package org.connector.exceptions;
 
-import java.io.IOException;
-
 public class CouchDBException extends RuntimeException {
 
     public CouchDBException(String errorMessage, Exception e) {
@@ -14,5 +12,9 @@ public class CouchDBException extends RuntimeException {
 
     public CouchDBException(Exception e){
         super(e);
+    }
+
+    public CouchDBException(int statusCode, String method, String uri, String reason) {
+
     }
 }

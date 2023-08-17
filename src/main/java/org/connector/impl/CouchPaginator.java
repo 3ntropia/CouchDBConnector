@@ -2,14 +2,11 @@ package org.connector.impl;
 
 import org.connector.query.CouchQuery;
 import org.connector.model.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CouchPaginator<T extends Document> {
-    private static final Logger LOG = LoggerFactory.getLogger(CouchPaginator.class);
     private final AbstractCouchDAO<T> dao;
     private final CouchQuery query;
     private int pageSize = 50;

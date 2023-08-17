@@ -28,41 +28,23 @@ import java.util.stream.Collectors;
 public abstract class AbstractCouchDbIntegrationTest {
 
     static final String integrationTestEnabled = System.getenv("INTEGRATION_DB");
-    static final String testContainerEnabled = System.getenv("TEST_CONTAINER_DB");
     static final Function<List<? extends Document>, List<String>> toIds =
             couchEntities -> couchEntities.stream()
                     .map(Document::getId)
                     .collect(Collectors.toList());
-
-    static GenericContainer<?> COUCH_DB;
     static CouchDBClient couchDbClient;
     static ParentDAO parentDAO;
     static ChildDAO childDAO;
     static SomeDAO someDAO;
 
     @BeforeAll
-    static void setUpDatabaseClient() throws Exception {
+    static void setUpDatabaseClient() {
         if (integrationTestEnabled.equals("true")) {
             var dbHost = System.getenv("COUCH_DB_HOST");
             var dbPort = Integer.parseInt(System.getenv("COUCH_DB_PORT"));
             var dbUser = System.getenv("COUCH_DB_USER");
             var dbPass = System.getenv("COUCH_DB_PASS");
             var dbName = System.getenv("COUCH_DB_NAME");
-
-            if (testContainerEnabled.equals("true")) {
-                COUCH_DB = new GenericContainer<>(DockerImageName.parse("couchdb:latest"))
-                        .withExposedPorts(5984, 6984)
-                        .withEnv("COUCHDB_USER", dbUser)
-                        .withEnv("COUCHDB_PASSWORD", dbPass)
-                        .withCopyFileToContainer(MountableFile.forClasspathResource("couchdb/local.ini", 0744),"/opt/couchdb/etc/local.ini")
-                        .withCopyFileToContainer(MountableFile.forClasspathResource("couchdb/server.crt", 0744),"/opt/couchdb/etc/server.crt")
-                        .withCopyFileToContainer(MountableFile.forClasspathResource("couchdb/server.csr", 0744),"/opt/couchdb/etc/server.csr")
-                        .withCopyFileToContainer(MountableFile.forClasspathResource("couchdb/server.key", 0744),"/opt/couchdb/etc/server.key");
-
-                COUCH_DB.start();
-                dbHost = COUCH_DB.getHost();
-                dbPort = COUCH_DB.getMappedPort(5984);
-            }
 
             couchDbClient = CouchDBClient.builder()
                     .url(Protocol.HTTP.getValue(), dbHost, dbPort)
@@ -135,6 +117,5 @@ public abstract class AbstractCouchDbIntegrationTest {
         public ChildDAO(CouchDBClient client) {
             super(client, ChildCouchEntity.class);
         }
-
     }
 }

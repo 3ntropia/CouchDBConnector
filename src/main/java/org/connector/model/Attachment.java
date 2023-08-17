@@ -41,12 +41,6 @@ public class Attachment {
 	private long length;
 	private boolean stub;
 	
-	// Constructor
-	
-	public Attachment() {
-
-	}
-	
 	/**
 	 * @param data The base64 encoded data of the attachment.
 	 * @param contentType The Content-Type of the attachment.

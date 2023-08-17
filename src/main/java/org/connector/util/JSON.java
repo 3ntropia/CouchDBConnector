@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import org.connector.exceptions.CouchDBException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,7 +97,7 @@ public class JSON {
         try {
             return JACKSON.convertValue(value, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -113,7 +114,7 @@ public class JSON {
         try {
             return JACKSON.readValue(value, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -121,7 +122,7 @@ public class JSON {
         try {
             return JACKSON.readValue(value, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -130,7 +131,7 @@ public class JSON {
             JACKSON_NO_NULLS.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             return JACKSON_NO_NULLS.readValue(value, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -147,7 +148,7 @@ public class JSON {
         try {
             return JACKSON.readValue(value, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -163,7 +164,7 @@ public class JSON {
             assert fileUrl != null : String.format("Could not find %s on classpath", filePath);
             return JACKSON.readValue(fileUrl, JACKSON.getTypeFactory().constructCollectionType(collectionType, elementType));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -179,7 +180,7 @@ public class JSON {
         try {
             return JACKSON.readValue(url, JACKSON.getTypeFactory().constructCollectionType(collectionType, elementType));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -194,7 +195,7 @@ public class JSON {
             if (result == null)
                 result = new URL(String.format("file:%s", filenameOrPath));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
         return result;
     }
@@ -205,7 +206,7 @@ public class JSON {
             assert fileUrl != null : String.format("Could not find %s on classpath", filenameOnClasspath);
             return JACKSON.readValue(fileUrl, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -219,7 +220,7 @@ public class JSON {
             assert fileUrl != null : String.format("Could not find %s on classpath", filenameOnClasspath);
             return objectMapper.readValue(fileUrl, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -231,7 +232,7 @@ public class JSON {
         try {
             return objectMapper.readValue(url, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -245,7 +246,7 @@ public class JSON {
         try {
             return JACKSON.readValue(jsonString, JACKSON.getTypeFactory().constructCollectionType(collectionType, elementType));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -262,7 +263,7 @@ public class JSON {
         try {
             return JACKSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(value, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         } finally {
             JACKSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         }
@@ -272,7 +273,7 @@ public class JSON {
         try {
             return JACKSON.writeValueAsString(o);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -282,7 +283,7 @@ public class JSON {
 
             return JACKSON.readValue(s, JACKSON.getTypeFactory().constructCollectionType(collectionType, elementType));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -296,7 +297,7 @@ public class JSON {
         try {
             return JACKSON_NO_NULLS.writeValueAsString(o);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -304,7 +305,7 @@ public class JSON {
         try {
             return JACKSON.readValue(value, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 
@@ -315,7 +316,7 @@ public class JSON {
             else
                 return JACKSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(value, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         } finally {
             JACKSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         }
@@ -335,7 +336,7 @@ public class JSON {
         try {
             return JACKSON.readValue(value, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CouchDBException(e);
         }
     }
 

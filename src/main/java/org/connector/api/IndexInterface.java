@@ -4,23 +4,23 @@ import org.connector.model.CreateIndexRequest;
 import org.connector.model.CreateIndexResponse;
 import org.connector.model.GetIndexResponse;
 import org.apache.http.HttpResponse;
-import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.NonNull;
 
 /**
  * https://docs.couchdb.org/en/latest/api/database/find.html#db-index
  */
 interface IndexInterface {
 
-    @NotNull
-    CreateIndexResponse createIndex(@NotNull CreateIndexRequest index, String databaseName);
+    @NonNull
+    CreateIndexResponse createIndex(@NonNull CreateIndexRequest index, String databaseName);
 
-    @NotNull
-    CreateIndexResponse createIndex(@NotNull String indexJsonString, String databaseName);
+    @NonNull
+    CreateIndexResponse createIndex(@NonNull String indexJsonString, String databaseName);
 
-    @NotNull
+    @NonNull
     GetIndexResponse getIndexes(String database);
 
-    HttpResponse deleteIndex(String database, @NotNull String ddoc, @NotNull String name);
+    HttpResponse deleteIndex(String database, @NonNull String ddoc, @NonNull String name);
 
     boolean indexExists(String indexName);
 }

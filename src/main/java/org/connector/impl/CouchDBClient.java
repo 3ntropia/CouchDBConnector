@@ -22,7 +22,6 @@ import org.connector.model.GetPartitionResponse;
 import org.connector.model.PurgeResponse;
 import org.connector.exceptions.CouchDBException;
 import org.connector.model.Document;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -37,8 +36,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.connector.util.JSON;
 import org.connector.util.ConnectorFunction;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -67,7 +66,6 @@ import static org.connector.util.ConnectorFunction.wrapEx;
  * Interfaces are provided for encapsulation purposes.
  *
  */
-@Slf4j
 public class CouchDBClient implements DBInterface, DocumentInterface {
 
     private final URI baseURI;
@@ -88,8 +86,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         this.bulkMaxSize = 0;
     }
 
-    public CouchDBClient(@NotNull URI uri, @NotNull String database, @NotNull HttpHost host,
-                         @NotNull HttpContext context, @NotNull HttpClient client, boolean createDatabase,
+    public CouchDBClient(@NonNull URI uri, @NonNull String database, @NonNull HttpHost host,
+                         @NonNull HttpContext context, @NonNull HttpClient client, boolean createDatabase,
                          boolean defaultPartitioned, int bulkMaxSize, boolean testConnection, boolean initIndexes) {
         Assert.notNull(uri, "URI (protocol, host, port) cannot be null");
         Assert.hasText(database, "database name must be provided.");
@@ -107,7 +105,6 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
 
         if(testConnection) {
             var response = getInstanceMetaInfo();
-            log.debug("connection test result: {}", response);
             if (!isBlank(response)) {
                 if (createDatabase)
                     createDatabase();
@@ -146,9 +143,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public int deleteDatabase(@NotNull String databaseName) {
+    public int deleteDatabase(@NonNull String databaseName) {
         var sc = delete(getURI(baseURI, databaseName), r -> r.getStatusLine().getStatusCode());
-        log.debug("Deleted database: {}, resulted in status_code: {}", databaseName, sc);
         return sc;
     }
 
@@ -158,24 +154,23 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public int createDatabase(@NotNull String databaseName) {
+    public int createDatabase(@NonNull String databaseName) {
         var dbURI = getURI(baseURI, databaseName);
         var uri = isPartitioned
                 ? getURI(dbURI, List.of(asPair("partitioned", "true")))
                 : dbURI;
         var sc = put(uri, "", r -> r.getStatusLine().getStatusCode());
-        log.debug("Create database: {}, resulted in status_code: {}", databaseName, sc);
         return sc;
     }
 
     @Override
-    public boolean databaseExists(@NotNull final String databaseName) {
+    public boolean databaseExists(@NonNull final String databaseName) {
         head(getURI(baseURI, databaseName));
         return true;
     }
 
     @Override
-    public GetDatabaseInfoResponse getDatabaseInfo(@NotNull String databaseName) {
+    public GetDatabaseInfoResponse getDatabaseInfo(@NonNull String databaseName) {
         var dbName = isBlank(databaseName) ? this.database : databaseName;
         return get(getURI(baseURI, dbName), response ->
                 JSON.readValue(response.getEntity().getContent(), GetDatabaseInfoResponse.class));
@@ -217,12 +212,12 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public @NotNull CreateIndexResponse createIndex(@NotNull CreateIndexRequest index, String databaseName) {
+    public @NonNull CreateIndexResponse createIndex(@NonNull CreateIndexRequest index, String databaseName) {
         return createIndex(toJson(index), databaseName);
     }
 
     @Override
-    public @NotNull CreateIndexResponse createIndex(@NotNull String indexJsonString, String databaseName) {
+    public @NonNull CreateIndexResponse createIndex(@NonNull String indexJsonString, String databaseName) {
         var dbName = isBlank(databaseName)? this.database : databaseName;
         var uri = getURI(baseURI, dbName, COUCH_INDEX_PATH);
         return post(uri, indexJsonString, response ->
@@ -247,14 +242,14 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public @NotNull GetIndexResponse getIndexes(String database) {
+    public @NonNull GetIndexResponse getIndexes(String database) {
         var dbName = isBlank(database)? this.database : database;
         var uri = getURI(baseURI, dbName, COUCH_INDEX_PATH);
         return get(uri, response -> JSON.readValue(response.getEntity().getContent(), GetIndexResponse.class));
     }
 
     @Override
-    public HttpResponse deleteIndex(String database, @NotNull String ddoc, @NotNull String name) {
+    public HttpResponse deleteIndex(String database, @NonNull String ddoc, @NonNull String name) {
         var dbName = isBlank(database)? this.database : database;
         var uri = getURI(baseURI, dbName, COUCH_INDEX_PATH, ddoc,"json", name);
         return delete(uri, response -> response);
@@ -268,7 +263,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public GetPartitionResponse getPartitionInfo(String database, @NotNull String partition) {
+    public GetPartitionResponse getPartitionInfo(String database, @NonNull String partition) {
         var dbName = isBlank(database)? this.database : database;
         var uri = getURI(baseURI, dbName, COUCH_PARTITION_PATH, partition);
         return get(uri, response -> JSON.readValue(response.getEntity().getContent(), GetPartitionResponse.class));
@@ -294,7 +289,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> BulkSaveResponse bulkSave(@NotNull BulkSaveRequest<T> request) {
+    public <T extends Document> BulkSaveResponse bulkSave(@NonNull BulkSaveRequest<T> request) {
         var uri = getURI(baseURI, database, COUCH_BULK_DOCS_PATH);
         var typeReference = JSON.getCollectionType(List.class, BulkSaveResponse.BulkSaveResult.class);
         return post(uri, toJson(request), response ->
@@ -304,7 +299,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> BulkSaveResponse bulkDelete(@NotNull BulkSaveRequest<T> request) {
+    public <T extends Document> BulkSaveResponse bulkDelete(@NonNull BulkSaveRequest<T> request) {
         request.docs().forEach(doc -> doc.setDeleted(true));
         return bulkSave(request);
     }
@@ -338,12 +333,12 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
 
 
     @Override
-    public CouchHttpHeaders getDocumentInfo(@NotNull String docId) {
+    public CouchHttpHeaders getDocumentInfo(@NonNull String docId) {
         return head(getURI(baseURI, database, docId));
     }
 
     @Override
-    public <T extends Document> T getDocumentById(@NotNull String docId, Class<T> clazz) {
+    public <T extends Document> T getDocumentById(@NonNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, database, docId);
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -351,7 +346,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> T getDocumentById(@NotNull String docId, boolean revs, Class<T> clazz) {
+    public <T extends Document> T getDocumentById(@NonNull String docId, boolean revs, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs", String.valueOf(revs))));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -359,7 +354,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> T getDocumentByRev(@NotNull String docId, String rev, Class<T> clazz) {
+    public <T extends Document> T getDocumentByRev(@NonNull String docId, String rev, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -367,7 +362,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public <T extends Document> T getDocumentRevsInfo(@NotNull String docId, Class<T> clazz) {
+    public <T extends Document> T getDocumentRevsInfo(@NonNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs_info", "true")));
         var type = JSON.getParameterizedType(Document.class, clazz);
         var rawJsonResponse = get(uri, this::mapResponseToJsonString);
@@ -385,21 +380,21 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public SaveResponse saveDocument(@NotNull String docId, Document doc) {
+    public SaveResponse saveDocument(@NonNull String docId, Document doc) {
         var uri = getURI(baseURI, database, docId);
         return put(uri, toJson(doc), response ->
                 JSON.readValue(response.getEntity().getContent(), SaveResponse.class));
     }
 
     @Override
-    public SaveResponse saveDocument(@NotNull String docId, String rev, Document doc) {
+    public SaveResponse saveDocument(@NonNull String docId, String rev, Document doc) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
         return put(uri, toJson(doc), response ->
                 JSON.readValue(response.getEntity().getContent(), SaveResponse.class));
     }
 
     @Override
-    public SaveResponse deleteDocument(@NotNull String docId, @NotNull String rev) {
+    public SaveResponse deleteDocument(@NonNull String docId, @NonNull String rev) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
         return delete(uri, response ->
                 JSON.readValue(response.getEntity().getContent(), SaveResponse.class));
@@ -427,13 +422,12 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
                     try {
                         return EntityUtils.toString(entity, StandardCharsets.UTF_8);
                     } catch (IOException e) {
-                        log.error("Error occurred while trying to parse response: {}", response.getEntity(), e);
                         throw new CouchDBException("Error parsing response", e);
                     }
                 }).orElse(null);
     }
 
-    private @NotNull URI getURI(@NotNull URI base, String... pathSegments) {
+    private @NonNull URI getURI(@NonNull URI base, String... pathSegments) {
         try {
             return new URIBuilder(base).setPathSegments(pathSegments).build();
         } catch (URISyntaxException e) {
@@ -441,7 +435,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private @NotNull URI getURI(@NotNull URI base, @NotNull List<NameValuePair> parameters) {
+    private @NonNull URI getURI(@NonNull URI base, @NonNull List<NameValuePair> parameters) {
         try {
             return new URIBuilder(base).addParameters(parameters).build();
         } catch (URISyntaxException e) {
@@ -449,8 +443,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private @NotNull URI getURI(@NotNull URI base, @NotNull List<String> pathSegments,
-                                @NotNull List<NameValuePair> parameters) {
+    private @NonNull URI getURI(@NonNull URI base, @NonNull List<String> pathSegments,
+                                @NonNull List<NameValuePair> parameters) {
         try {
             return new URIBuilder(base).setPathSegments(pathSegments).addParameters(parameters).build();
         } catch (URISyntaxException e) {
@@ -459,12 +453,12 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
-    public @NotNull URI getPartitionURI(@NotNull String dbName, @NotNull String partition) {
+    public @NonNull URI getPartitionURI(@NonNull String dbName, @NonNull String partition) {
         return getURI(baseURI, dbName, COUCH_PARTITION_PATH, partition);
     }
 
-    private <T> T get(@NotNull URI uri,
-                      @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+    private <T> T get(@NonNull URI uri,
+                      @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             var get = new HttpGet(uri);
             get.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
@@ -473,8 +467,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private <T> T post(@NotNull URI uri, @NotNull String json,
-                       @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+    private <T> T post(@NonNull URI uri, @NonNull String json,
+                       @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var post = new HttpPost(uri);
             var entity = new StringEntity(json, "UTF-8");
@@ -485,8 +479,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private <T> T put(@NotNull URI uri, @NotNull String json,
-                      @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+    private <T> T put(@NonNull URI uri, @NonNull String json,
+                      @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var put = new HttpPut(uri);
             var entity = new StringEntity(json, "UTF-8");
@@ -497,8 +491,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private <T> T delete(@NotNull URI uri,
-                         @NotNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
+    private <T> T delete(@NonNull URI uri,
+                         @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var delete = new HttpDelete(uri);
             delete.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
@@ -507,7 +501,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private CouchHttpHeaders head(@NotNull URI uri) {
+    private CouchHttpHeaders head(@NonNull URI uri) {
         try (var response = new AutoCloseableHttpResponse()) {
             final var head = new HttpHead(uri);
             response.set(execute(head));
@@ -520,7 +514,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
-    private @NotNull HttpResponse execute(@NotNull HttpRequestBase request) {
+    private @NonNull HttpResponse execute(@NonNull HttpRequestBase request) {
         try {
             return httpClient.execute(httpHost, request, httpContext);
         } catch (IOException e) {

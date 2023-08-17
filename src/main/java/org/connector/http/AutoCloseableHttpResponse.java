@@ -18,14 +18,14 @@ package org.connector.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.connector.exceptions.CouchDBException;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
 
 
-@Slf4j
 public class AutoCloseableHttpResponse implements AutoCloseable {
 
     private HttpResponse response;
@@ -33,7 +33,7 @@ public class AutoCloseableHttpResponse implements AutoCloseable {
     /**
      * @param response which should be wrapped and automatically closed. Must not be {@literal null}
      */
-    public void set(@NotNull HttpResponse response) {
+    public void set(@NonNull HttpResponse response) {
         Assert.notNull(response, "Response must not be null");
         this.response = response;
     }
@@ -48,7 +48,7 @@ public class AutoCloseableHttpResponse implements AutoCloseable {
             try {
                 response.getEntity().getContent().close();
             } catch (IOException e) {
-                log.error("Unable to close input stream");
+                throw new CouchDBException("Unable to close input stream");
             }
         }
     }

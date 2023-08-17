@@ -3,11 +3,11 @@ package org.connector.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.marvel.util.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.connector.util.JSON;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,8 +30,7 @@ public class IndexDefinition {
     public boolean equalsToResponse(GetIndexResponse.IndexResponse indexResponse) {
         var fieldNames = indexResponse.getDef().getFields().stream()
                 .map(JSON::convertToStringMap)
-                .flatMap(stringStringMap -> stringStringMap.keySet().stream())
-                .collect(Collectors.toList());
+                .flatMap(stringStringMap -> stringStringMap.keySet().stream()).toList();
         return new HashSet<>(this.fields).containsAll(fieldNames);
     }
 }

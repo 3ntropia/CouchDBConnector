@@ -1,6 +1,5 @@
 package org.connector.impl;
 
-import lombok.Getter;
 import org.connector.model.Document;
 
 import java.util.List;
