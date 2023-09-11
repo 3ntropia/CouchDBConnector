@@ -233,7 +233,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     public Boolean createView(ViewRequest viewRequest, String designDoc) {
         var uri = getURI(baseURI, database,"_design", designDoc);
         var code = put(uri, toJson(viewRequest), r -> r.getStatusLine().getStatusCode());
-        return 202 == code;
+        return 201 == code || 202 == code;
     }
 
     public ViewRequest getView(String designDoc) {

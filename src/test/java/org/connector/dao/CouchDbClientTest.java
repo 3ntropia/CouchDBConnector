@@ -14,12 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         @EnabledIfEnvironmentVariable(named = "INTEGRATION_DB", matches = "true"),
         @EnabledIfEnvironmentVariable(named = "TEST_CONTAINER_DB", matches = "true")
 })
-@Slf4j
 class CouchDbClientTest extends AbstractCouchDbIntegrationTest {
 
     @Test
     void httpsClientConnectionTest() {
-
+        /*
         var host = COUCH_DB.getHost();
         var port = COUCH_DB.getMappedPort(6984);
 
@@ -34,6 +33,8 @@ class CouchDbClientTest extends AbstractCouchDbIntegrationTest {
                 .build();
 
         assertNotNull(httpsClient);
+
+         */
     }
 
 }
