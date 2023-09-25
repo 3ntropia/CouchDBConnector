@@ -113,12 +113,6 @@ public class CouchDBClientBuilder {
         return this;
     }
 
-    public @NonNull CouchDBClientBuilder initIndexesFromFiles(@NonNull Boolean initIndexesFromFiles) {
-        Assert.notNull(initIndexesFromFiles, "initIndexesFromFiles must not be null.");
-        this.properties.setInitIndexesFromFiles(initIndexesFromFiles);
-        return this;
-    }
-
     public @NonNull CouchDBClientBuilder createDatabase(@NonNull Boolean createDatabase) {
         Assert.notNull(createDatabase, "createDatabase must not be null.");
         this.properties.setCreateDatabase(createDatabase);
@@ -136,7 +130,7 @@ public class CouchDBClientBuilder {
         var client = getHttpClient();
         return new CouchDBClient(uri, properties.getDatabase(), host, context, client,
                 properties.isCreateDatabase(), properties.isDefaultPartitioned(), properties.getBulkMaxSize(),
-                properties.isTestConnection(), properties.isInitIndexesFromFiles());
+                properties.isTestConnection());
     }
 
     private @NonNull HttpContext getHttpContext(@NonNull HttpHost host, @NonNull String username, @NonNull String password) {

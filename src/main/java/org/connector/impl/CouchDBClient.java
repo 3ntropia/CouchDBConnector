@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
@@ -46,6 +47,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -81,19 +83,9 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     private final boolean isPartitioned;
     private final int bulkMaxSize; //todo use to implement in find requests.
 
-    private CouchDBClient(){
-        this.baseURI = null;
-        this.database = null;
-        this.httpHost = null;
-        this.httpContext = null;
-        this.httpClient = null;
-        this.isPartitioned = false;
-        this.bulkMaxSize = 0;
-    }
-
     public CouchDBClient(@NonNull URI uri, @NonNull String database, @NonNull HttpHost host,
                          @NonNull HttpContext context, @NonNull HttpClient client, boolean createDatabase,
-                         boolean defaultPartitioned, int bulkMaxSize, boolean testConnection, boolean initIndexes) {
+                         boolean defaultPartitioned, int bulkMaxSize, boolean testConnection) {
         Assert.notNull(uri, "URI (protocol, host, port) cannot be null");
         Assert.hasText(database, "database name must be provided.");
         Assert.notNull(host, "HTTP Host must not be null.");
@@ -399,6 +391,17 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
+    public SaveResponse saveAttachment(@NonNull InputStream bytesIn, String name, String contentType) {
+        var uri = getURI(baseURI, database, name);
+        return put(uri, bytesIn, contentType);
+    }
+
+    @Override
+    public SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev) {
+        return null;
+    }
+
+    @Override
     public SaveResponse deleteDocument(@NonNull String docId, @NonNull String rev) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
         return delete(uri, response ->
@@ -496,6 +499,19 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         }
     }
 
+    private SaveResponse put(URI uri, InputStream instream, String contentType) {
+        try (var response = new AutoCloseableHttpResponse()) {
+            final HttpPut put = new HttpPut(uri);
+            final InputStreamEntity entity = new InputStreamEntity(instream, -1);
+            entity.setContentType(contentType);
+            put.setEntity(entity);
+            response.set(execute(put));
+            return JSON.readValue(response.get().getEntity().getContent(), SaveResponse.class);
+        } catch (Exception e) {
+            throw new CouchDBException(e);
+        }
+    }
+
     private <T> T delete(@NonNull URI uri,
                          @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
         try (var response = new AutoCloseableHttpResponse()) {
@@ -516,6 +532,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
                             NameValuePair::getValue
                     ));
             return CouchHttpHeaders.of(headers);
+        }finally {
+            close();
         }
     }
 
@@ -525,6 +543,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         } catch (IOException e) {
             request.abort();
             throw new CouchDBException(e);
+        } finally {
+            close();
         }
     }
 

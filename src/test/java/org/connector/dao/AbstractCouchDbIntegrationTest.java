@@ -40,7 +40,7 @@ public abstract class AbstractCouchDbIntegrationTest {
                     .database(dbName)
                     .username(dbUser)
                     .password(dbPass)
-                    .maxConnections(50)
+                    .maxConnections(10)
                     .createDatabase(true)
                     .build();
             childDAO = new ChildDAO(couchDbClient);
@@ -52,7 +52,7 @@ public abstract class AbstractCouchDbIntegrationTest {
     @AfterAll
     static void tearDown() {
         if (integrationTestEnabled.equals("true")) {
-            couchDbClient.deleteDatabase();
+            //couchDbClient.deleteDatabase();
         }
     }
 

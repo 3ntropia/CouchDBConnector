@@ -63,12 +63,11 @@ sourceCompatibility = JavaVersion.VERSION_19
 
 test {
     environment("INTEGRATION_DB": true)
-    environment("TEST_CONTAINER_DB": false)
     environment("COUCH_DB_HOST": "localhost")
     environment("COUCH_DB_PORT": 5984)
     environment("COUCH_DB_USER": "admin")
     environment("COUCH_DB_PASS": "admin")
-    environment("COUCH_DB_NAME": "itest-db")
+    environment("COUCH_DB_NAME": "itest-db2")
     useJUnitPlatform()
 }
 

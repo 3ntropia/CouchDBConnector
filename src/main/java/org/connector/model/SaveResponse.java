@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record SaveResponse(
         Boolean ok,
         String id,
-        String rev) {
+        String rev,
+        String error,
+        String reason) {
 
 }

@@ -24,10 +24,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record Attachment(
 		String data,
 		@JsonProperty("content_type")
-				String contentType,
+		String contentType,
 		int revpos,
 		String digest,
 		long length,
 		boolean stub) {
 
+
+	public static Attachment withDataContent(String data, String contentType) {
+		return new Attachment(data, contentType, 0, "", 0L, false);
+	}
+
+	public static Attachment empty() {
+		return new Attachment("", "", 0, "", 0L, false);
+	}
 }

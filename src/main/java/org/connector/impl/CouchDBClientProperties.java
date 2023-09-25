@@ -25,15 +25,13 @@ public class CouchDBClientProperties {
     private String password = "admin";
     private String database;
     @Builder.Default
-    private int bulkMaxSize = 10000;
+    private int bulkMaxSize = 100;
     @Builder.Default
-    private int maxConnections = 50;
+    private int maxConnections = 10;
     @Builder.Default
     private boolean defaultPartitioned = true;
     @Builder.Default
     private boolean testConnection = true;
-    @Builder.Default
-    private boolean initIndexesFromFiles = true;
     @Builder.Default
     private boolean createDatabase = false;
 
@@ -48,7 +46,6 @@ public class CouchDBClientProperties {
         this.defaultPartitioned = properties.isDefaultPartitioned();
         this.database = properties.getDatabase();
         this.testConnection = properties.isTestConnection();
-        this.initIndexesFromFiles = properties.isInitIndexesFromFiles();
         this.createDatabase = properties.isCreateDatabase();
     }
 }

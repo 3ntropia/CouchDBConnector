@@ -85,6 +85,8 @@ public abstract class AbstractCouchDAO <T extends Document> implements CouchDAOI
     @Override
     public T create(T o) {
         var result = this.client.saveDocument(o.getId(), o);
+        o.setRev(result.rev());
+        o.setId(result.id());
         return o;
     }
 

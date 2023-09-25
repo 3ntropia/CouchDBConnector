@@ -14,6 +14,7 @@ import org.connector.model.SaveResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.io.InputStream;
 import java.util.Map;
 
 public interface DocumentInterface {
@@ -31,6 +32,10 @@ public interface DocumentInterface {
     SaveResponse saveDocument(@NonNull String docId, Document doc);
 
     SaveResponse saveDocument(@NonNull String docId, String rev, Document doc);
+
+    SaveResponse saveAttachment(@NonNull InputStream bytesIn, String name, String contentType);
+
+    SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev);
 
     SaveResponse deleteDocument(@NonNull String docId, @NonNull String rev);
 
@@ -50,4 +55,5 @@ public interface DocumentInterface {
     CouchQueryViewResponse findView(String partition, String designDocName, String viewName, String key);
 
     CouchQueryViewResponse findView(String partition, String designDocName, String viewName, String starKey, String endKey);
+
 }
