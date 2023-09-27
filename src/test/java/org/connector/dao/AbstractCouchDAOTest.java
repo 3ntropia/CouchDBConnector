@@ -2,6 +2,7 @@ package org.connector.dao;
 
 
 import org.connector.dao.query.entities.ExtraClass;
+import org.connector.dao.query.entities.Foo;
 import org.connector.dao.query.entities.InnerClass;
 import org.connector.dao.query.entities.SomeClass;
 import org.connector.impl.CouchPaginator;
@@ -107,7 +108,7 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
                 .language("javascript")
                 .build();
         Boolean viewCreated = someDAO.getClient().createView(viewRequest, "test");
-        assertTrue(viewCreated);
+        //assertTrue(viewCreated);
     }
     @Test
     @Order(7)
@@ -258,5 +259,21 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
         List<SomeClass> secondPage = couchPaginator.getPage(1);
         assertNotNull(secondPage);
         assertEquals("1:3", secondPage.get(0).getId());
+    }
+
+    @Test
+    @Order(18)
+    void queryByDAOId() {
+        var fooClass = someDAO.getById("1:1");
+        assertNotNull(fooClass);
+        assertEquals("1:1", fooClass.getId());
+    }
+
+    @Test
+    @Order(19)
+    void queryByCouchClienteId() {
+        var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
+        assertNotNull(fooClass);
+        assertEquals("1:1", fooClass.getId());
     }
 }

@@ -101,10 +101,9 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
 
         if(testConnection) {
             var response = getInstanceMetaInfo();
-            if (!isBlank(response)) {
-                if (createDatabase)
-                    createDatabase();
-            }
+        }
+        if (createDatabase && !databaseExists(database)){
+            createDatabase();
         }
     }
 
@@ -161,7 +160,11 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
 
     @Override
     public boolean databaseExists(@NonNull final String databaseName) {
-        head(getURI(baseURI, databaseName));
+        try {
+            head(getURI(baseURI, databaseName));
+        } catch (CouchDBException e){
+            return false;
+        }
         return true;
     }
 

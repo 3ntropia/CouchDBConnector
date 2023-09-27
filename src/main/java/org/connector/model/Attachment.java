@@ -18,18 +18,22 @@ package org.connector.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Attachment(
-		String data,
-		@JsonProperty("content_type")
-		String contentType,
-		int revpos,
-		String digest,
-		long length,
-		boolean stub) {
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Attachment {
+	private String data;
+	@JsonProperty("content_type")
+	private String contentType;
+	private int revpos;
+	private String digest;
+	private long length;
+	private boolean stub;
 
 	public static Attachment withDataContent(String data, String contentType) {
 		return new Attachment(data, contentType, 0, "", 0L, false);
