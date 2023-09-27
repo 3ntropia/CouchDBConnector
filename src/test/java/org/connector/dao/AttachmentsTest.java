@@ -5,7 +5,7 @@ import org.connector.dao.query.entities.Bar;
 import org.connector.dao.query.entities.Foo;
 import org.connector.model.Attachment;
 import org.connector.model.SaveResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,9 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.connector.dao.AbstractCouchDbIntegrationTest.couchDbClient;
 
-public class AttachmentsTest {
+public class AttachmentsTest extends AbstractCouchDbIntegrationTest{
 
 	private final Map<String, Attachment> attachmentMap = new HashMap<>();
 

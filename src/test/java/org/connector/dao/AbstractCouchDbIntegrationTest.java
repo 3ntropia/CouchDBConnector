@@ -52,7 +52,7 @@ public abstract class AbstractCouchDbIntegrationTest {
     @AfterAll
     static void tearDown() {
         if (integrationTestEnabled.equals("true")) {
-            //couchDbClient.deleteDatabase();
+            couchDbClient.deleteDatabase();
         }
     }
 
