@@ -61,7 +61,6 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
-import static org.apache.http.client.utils.HttpClientUtils.closeQuietly;
 import static org.connector.query.IntegrationConstants.*;
 import static org.connector.util.ConnectorFunction.wrapEx;
 import static org.connector.util.JSON.toJson;
@@ -532,8 +531,6 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
                             NameValuePair::getValue
                     ));
             return CouchHttpHeaders.of(headers);
-        }finally {
-            close();
         }
     }
 
@@ -543,16 +540,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         } catch (IOException e) {
             request.abort();
             throw new CouchDBException(e);
-        } finally {
-            close();
         }
-    }
-
-    /**
-     * Method to end the connection to the CouchDb endpoint. Should be used as destroyer method in spring beans.
-     */
-    public void close() {
-        closeQuietly(this.httpClient);
     }
 
     private static NameValuePair asPair(String key, String value) {

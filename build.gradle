@@ -67,7 +67,7 @@ test {
     environment("COUCH_DB_PORT": 5984)
     environment("COUCH_DB_USER": "admin")
     environment("COUCH_DB_PASS": "admin")
-    environment("COUCH_DB_NAME": "itest-db2")
+    environment("COUCH_DB_NAME": "itest-db")
     useJUnitPlatform()
 }
 
