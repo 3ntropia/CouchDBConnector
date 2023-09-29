@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
-public interface DBInterface extends IndexInterface {
+public interface IdbOps extends IIndexs {
 
     int createDatabase();
 

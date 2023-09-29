@@ -17,7 +17,7 @@ import org.springframework.lang.Nullable;
 import java.io.InputStream;
 import java.util.Map;
 
-public interface DocumentInterface {
+public interface IDocuments {
 
     CouchHttpHeaders getDocumentInfo(@NonNull String docId);
 
@@ -25,6 +25,8 @@ public interface DocumentInterface {
     <T extends Document> T getDocumentById(@NonNull String docId, boolean revs, Class<T> clazz);
     <T extends Document> T getDocumentByRev(@NonNull String docId, String rev, Class<T> clazz);
     <T extends Document> T getDocumentRevsInfo(@NonNull String docId, Class<T> clazz);
+
+    <T extends Document> T getDocumentByIdWithAttachments(@NonNull String docId, boolean attachments,Class<T> clazz);
 
     <T extends Document> FindResponse<T> find(FindRequest request, String partition, Class<T> clazz);
 
@@ -38,12 +40,6 @@ public interface DocumentInterface {
     SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev);
 
     SaveResponse deleteDocument(@NonNull String docId, @NonNull String rev);
-
-    <T extends Document> BulkGetResponse<T> bulkGet(BulkGetRequest request, Class<T> clazz);
-
-    <T extends Document> BulkSaveResponse bulkSave(@NonNull BulkSaveRequest<T> request);
-
-    <T extends Document> BulkSaveResponse bulkDelete(@NonNull BulkSaveRequest<T> request);
 
     CouchHttpHeaders getDesignDocHeads(String ddoc);
 

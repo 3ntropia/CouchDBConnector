@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 /**
  * https://docs.couchdb.org/en/latest/api/database/find.html#db-index
  */
-interface IndexInterface {
+interface IIndexs {
 
     @NonNull
     CreateIndexResponse createIndex(@NonNull CreateIndexRequest index, String databaseName);

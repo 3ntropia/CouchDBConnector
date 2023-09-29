@@ -7,15 +7,9 @@ import org.connector.query.CouchQuery;
 
 import java.util.List;
 
-public interface CouchDAOInterface <T extends Document> {
+public interface ICouchDAO<T extends Document> {
 
     T getById(String id);
-
-    List<T> bulkGetByIds(List<String> ids);
-
-    List<T> bulkGetByIds(String... ids);
-
-    List<String> getNotDeletedIds(List<String> ids);
 
     T create(T o);
 
@@ -26,8 +20,6 @@ public interface CouchDAOInterface <T extends Document> {
     List<T> update(List<T> toUpdate);
 
     void delete(String id);
-
-    void bulkDelete(List<T> toDelete);
 
     <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz);
 
