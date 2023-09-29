@@ -1,10 +1,7 @@
 package org.connector.dao;
 
 
-import org.connector.dao.query.entities.ExtraClass;
-import org.connector.dao.query.entities.Foo;
-import org.connector.dao.query.entities.InnerClass;
-import org.connector.dao.query.entities.SomeClass;
+import org.connector.dao.query.entities.*;
 import org.connector.impl.CouchPaginator;
 import org.connector.model.CouchQueryViewResponse;
 import org.connector.model.CreateIndexRequest;
@@ -275,5 +272,34 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
         var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
         assertNotNull(fooClass);
         assertEquals("1:1", fooClass.getId());
+    }
+
+    @Test
+    @Order(20)
+    void queryByCouchClienteIdRev() {
+        var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
+        var fooClassRev = couchDbClient.getDocumentByRev("1:1", fooClass.getRev(), Foo.class);
+        assertNotNull(fooClass);
+        assertEquals("1:1", fooClassRev.getId());
+    }
+
+    @Test
+    @Order(21)
+    void queryByCouchClienteIdRevivions() {
+        var fooClass = couchDbClient.getDocumentById("1:1", SomeClass.class);
+        fooClass.setField("modified");
+        couchDbClient.saveDocument(fooClass);
+        var fooClassRevitions = couchDbClient.getDocumentById("1:1", true, Foo.class);
+        assertNotNull(fooClass);
+        assertEquals("1:1", fooClassRevitions.getId());
+    }
+
+    @Test
+    @Order(22)
+    void fetchLightDocumentDownCasting() {
+        var lightSomeClass = couchDbClient.getDocumentById("1:4", LightSomeClass.class);
+        assertNotNull(lightSomeClass);
+        assertEquals("1:4", lightSomeClass.getId());
+        assertEquals("test field4", lightSomeClass.getField());
     }
 }

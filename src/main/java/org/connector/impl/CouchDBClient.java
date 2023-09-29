@@ -18,8 +18,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.connector.api.DBInterface;
-import org.connector.api.DocumentInterface;
+import org.connector.api.IBulk;
+import org.connector.api.IdbOps;
+import org.connector.api.IDocuments;
 import org.connector.exceptions.CouchDBException;
 import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
@@ -52,10 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -72,7 +70,7 @@ import static org.connector.util.JSON.toJson;
  * Interfaces are provided for encapsulation purposes.
  *
  */
-public class CouchDBClient implements DBInterface, DocumentInterface {
+public class CouchDBClient implements IdbOps, IDocuments, IBulk {
 
     private final URI baseURI;
     private final String database;
@@ -292,15 +290,31 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
         var uri = getURI(baseURI, database, COUCH_BULK_DOCS_PATH);
         var typeReference = JSON.getCollectionType(List.class, BulkSaveResponse.BulkSaveResult.class);
         return post(uri, toJson(request), response ->
-                new BulkSaveResponse(
-                        JSON.getJackson().readValue(response.getEntity().getContent(), typeReference)
-                ));
+                new BulkSaveResponse(JSON.getJackson().readValue(response.getEntity().getContent(), typeReference)));
     }
 
     @Override
     public <T extends Document> BulkSaveResponse bulkDelete(@NonNull BulkSaveRequest<T> request) {
         request.docs().forEach(doc -> doc.setDeleted(true));
         return bulkSave(request);
+    }
+
+    @Override
+    public <T extends Document> List<T> bulkGetByIds(List<String> ids, Class<T> clazz) {
+        var bulkGetReq = new BulkGetRequest(ids);
+        var response = bulkGet(bulkGetReq, clazz);
+        if (response != null) {
+            return response.getResults().stream()
+                    .flatMap(result -> result.getDocs().stream())
+                    .map(BulkGetResponse.BulkGetEntryDetail::getOk)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public <T extends Document>  List<T> bulkGetByIds(Class<T> clazz, String... ids) {
+        return bulkGetByIds(Arrays.asList(ids), clazz);
     }
 
     @Override
@@ -337,35 +351,40 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
     }
 
     @Override
+    public <T extends Document> T getDocumentByIdWithAttachments(@NonNull String docId, boolean attachments,Class<T> clazz) {
+        var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("attachments", "true")));
+        return getDocumentByURI(clazz, uri);
+    }
+
+    @Override
     public <T extends Document> T getDocumentById(@NonNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, database, docId);
-        var type = JSON.getParameterizedType(Document.class, clazz);
-        var rawJsonResponse = get(uri, this::mapResponseToJsonString);
-        return JSON.fromJson(rawJsonResponse, type);
+        return getDocumentByURI(clazz, uri);
     }
+
+    private <T extends Document> T getDocumentByURI(Class<T> clazz, URI uri) {
+        var rawJsonResponse = get(uri, this::mapResponseToJsonString);
+        return JSON.fromJson(rawJsonResponse, clazz);
+    }
+
+
 
     @Override
     public <T extends Document> T getDocumentById(@NonNull String docId, boolean revs, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs", String.valueOf(revs))));
-        var type = JSON.getParameterizedType(Document.class, clazz);
-        var rawJsonResponse = get(uri, this::mapResponseToJsonString);
-        return JSON.fromJson(rawJsonResponse, type);
+        return getDocumentByURI(clazz, uri);
     }
 
     @Override
     public <T extends Document> T getDocumentByRev(@NonNull String docId, String rev, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("rev", rev)));
-        var type = JSON.getParameterizedType(Document.class, clazz);
-        var rawJsonResponse = get(uri, this::mapResponseToJsonString);
-        return JSON.fromJson(rawJsonResponse, type);
+        return getDocumentByURI(clazz, uri);
     }
 
     @Override
     public <T extends Document> T getDocumentRevsInfo(@NonNull String docId, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs_info", "true")));
-        var type = JSON.getParameterizedType(Document.class, clazz);
-        var rawJsonResponse = get(uri, this::mapResponseToJsonString);
-        return JSON.fromJson(rawJsonResponse, type);
+        return getDocumentByURI(clazz, uri);
     }
 
     @Override
@@ -400,7 +419,8 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
 
     @Override
     public SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev) {
-        return null;
+        var uri = getURI(baseURI, database, docId, name);
+        return put(uri, bytesIn, contentType);
     }
 
     @Override
@@ -434,7 +454,7 @@ public class CouchDBClient implements DBInterface, DocumentInterface {
                     } catch (IOException e) {
                         throw new CouchDBException("Error parsing response", e);
                     }
-                }).orElse(null);
+                }).orElse("");
     }
 
     private @NonNull URI getURI(@NonNull URI base, String... pathSegments) {

@@ -1,7 +1,6 @@
 package org.connector.dao;
 
 import org.apache.commons.codec.binary.Base64;
-import org.connector.dao.query.entities.Bar;
 import org.connector.dao.query.entities.Foo;
 import org.connector.model.Attachment;
 import org.connector.model.SaveResponse;
@@ -27,7 +26,7 @@ public class AttachmentsTest extends AbstractCouchDbIntegrationTest{
 
 		Attachment attachment2 = Attachment.withDataContent(Base64.encodeBase64String("binary string".getBytes()), "text/plain");
 
-		Bar bar = new Bar("1:" + generateUUID()); // Bar extends Document
+		Foo bar = new Foo("1:" + generateUUID()); // Bar extends Document
 
 		attachmentMap.put("txt_1.txt", attachment1);
 		attachmentMap.put("txt_2.txt", attachment2);
@@ -42,13 +41,13 @@ public class AttachmentsTest extends AbstractCouchDbIntegrationTest{
 		Attachment attachment = Attachment.withDataContent("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=", "text/plain");
 		Map<String, Attachment> attachmentMap = new HashMap<>();
 		attachmentMap.put("txt_1.txt", attachment);
-		Bar bar = new Bar("1:1234");
-		bar.setAttachments(attachmentMap);
+		Foo foo = new Foo("1:1234");
+		foo.setAttachments(attachmentMap);
 
-		SaveResponse response = couchDbClient.saveDocument(bar);
+		SaveResponse response = couchDbClient.saveDocument(foo);
 
-		Bar bar2 = couchDbClient.getDocumentById(response.id(), Bar.class);
-		String base64Data = bar2.getAttachments().get("txt_1.txt").getData();
+		Foo foo2 = couchDbClient.getDocumentById(response.id(), Foo.class);
+		String base64Data = foo2.getAttachments().get("txt_1.txt").getData();
 		assertNotNull(base64Data);
 	}
 	
@@ -77,7 +76,7 @@ public class AttachmentsTest extends AbstractCouchDbIntegrationTest{
 		byte[] bytesToDB = "binary data".getBytes();
 		ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesToDB);
 
-		SaveResponse respSave = couchDbClient.saveDocument(new Bar("i:" + generateUUID()));
+		SaveResponse respSave = couchDbClient.saveDocument(new Foo("i:" + generateUUID()));
 		
 		couchDbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", respSave.id(), respSave.rev());
 	}
