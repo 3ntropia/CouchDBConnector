@@ -140,7 +140,10 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
 
         SaveResponse respSave = couchDbClient.saveDocument(foo);
 
-        couchDbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", respSave.id(), respSave.rev());
+        var result = couchDbClient.saveAttachment(bytesIn, "foo.txt", "text/plain", respSave.id(), respSave.rev());
+
+        assertNotNull(respSave);
+        assertTrue(result.ok());
     }
 
     @Test
