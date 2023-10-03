@@ -57,6 +57,11 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
     }
 
     @Override
+    public List<T> getByIds(List<String> ids) {
+        return client.bulkGetByIds(ids, entityClass);
+    }
+
+    @Override
     public T create(T o) {
         var result = client.saveDocument(o.getId(), o);
         o.setRev(result.rev());
@@ -92,9 +97,17 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
     }
 
     @Override
-    public void delete(String id) {
+    public boolean delete(String id) {
         var toDelete = client.getDocumentById(id, this.entityClass);
         var result = client.deleteDocument(toDelete.getId(), toDelete.getRev());
+        return result.ok();
+    }
+
+    @Override
+    public boolean delete(List<String> ids) {
+        var toDeletes = client.bulkGetByIds(ids, entityClass);
+        var result = client.bulkDelete(new BulkSaveRequest<>(toDeletes));
+        return !result.results().isEmpty();
     }
 
     /**

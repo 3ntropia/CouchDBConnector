@@ -18,9 +18,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.connector.api.IBulk;
-import org.connector.api.IdbOps;
-import org.connector.api.IDocuments;
+import org.connector.api.ICouchClient;
 import org.connector.exceptions.CouchDBException;
 import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
@@ -70,7 +68,7 @@ import static org.connector.util.JSON.toJson;
  * Interfaces are provided for encapsulation purposes.
  *
  */
-public class CouchDBClient implements IdbOps, IDocuments, IBulk {
+public class CouchDBClient implements ICouchClient {
 
     private final URI baseURI;
     private final String database;

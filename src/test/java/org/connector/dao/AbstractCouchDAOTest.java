@@ -268,38 +268,30 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
 
     @Test
     @Order(19)
-    void queryByCouchClienteId() {
-        var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
-        assertNotNull(fooClass);
-        assertEquals("1:1", fooClass.getId());
+    void bulkGetByIds() {
+        var someClasses = someDAO.getByIds(Arrays.asList("1:4", "1:2"));
+        assertNotNull(someClasses);
+        assertEquals(2, someClasses.size());
+        assertEquals("1:4", someClasses.get(0).getId());
+        assertEquals("1:2", someClasses.get(1).getId());
     }
 
     @Test
     @Order(20)
-    void queryByCouchClienteIdRev() {
-        var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
-        var fooClassRev = couchDbClient.getDocumentByRev("1:1", fooClass.getRev(), Foo.class);
-        assertNotNull(fooClass);
-        assertEquals("1:1", fooClassRev.getId());
+    void bulkCreate() {
+        SomeClass someClass = SomeClass.builder().id("1:7").field("fields1").build();
+        SomeClass someClass2 = SomeClass.builder().id("1:8").field("fields2").build();
+        var someClasses = someDAO.create(Arrays.asList(someClass, someClass2));
+        assertNotNull(someClasses);
+        assertEquals(2, someClasses.size());
+        assertEquals("1:7", someClasses.get(0).getId());
+        assertEquals("1:8", someClasses.get(1).getId());
     }
 
     @Test
     @Order(21)
-    void queryByCouchClienteIdRevivions() {
-        var fooClass = couchDbClient.getDocumentById("1:1", SomeClass.class);
-        fooClass.setField("modified");
-        couchDbClient.saveDocument(fooClass);
-        var fooClassRevitions = couchDbClient.getDocumentById("1:1", true, Foo.class);
-        assertNotNull(fooClass);
-        assertEquals("1:1", fooClassRevitions.getId());
-    }
-
-    @Test
-    @Order(22)
-    void fetchLightDocumentDownCasting() {
-        var lightSomeClass = couchDbClient.getDocumentById("1:4", LightSomeClass.class);
-        assertNotNull(lightSomeClass);
-        assertEquals("1:4", lightSomeClass.getId());
-        assertEquals("test field4", lightSomeClass.getField());
+    void bulkDelete() {
+        var someClasses = someDAO.delete(Arrays.asList("1:7", "1:8"));
+        assertTrue(someClasses);
     }
 }
