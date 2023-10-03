@@ -11,6 +11,8 @@ public interface ICouchDAO<T extends Document> {
 
     T getById(String id);
 
+    List<T> getByIds(List<String> ids);
+
     T create(T o);
 
     List<T> create(List<T> toSave);
@@ -19,7 +21,9 @@ public interface ICouchDAO<T extends Document> {
 
     List<T> update(List<T> toUpdate);
 
-    void delete(String id);
+    boolean delete(String id);
+
+    boolean delete(List<String> id);
 
     <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz);
 
