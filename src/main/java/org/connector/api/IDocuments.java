@@ -2,15 +2,7 @@ package org.connector.api;
 
 
 import org.connector.http.CouchHttpHeaders;
-import org.connector.model.BulkGetRequest;
-import org.connector.model.BulkGetResponse;
-import org.connector.model.BulkSaveRequest;
-import org.connector.model.BulkSaveResponse;
-import org.connector.model.CouchQueryViewResponse;
-import org.connector.model.Document;
-import org.connector.model.FindRequest;
-import org.connector.model.FindResponse;
-import org.connector.model.SaveResponse;
+import org.connector.model.*;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -35,9 +27,11 @@ public interface IDocuments {
 
     SaveResponse saveDocument(@NonNull String docId, String rev, Document doc);
 
-    SaveResponse saveAttachment(@NonNull InputStream bytesIn, String name, String contentType);
-
     SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev);
+
+    InputStream getAttachment(String name, String docId);
+
+    InputStream getAttachment(String name, String docId, String rev);
 
     SaveResponse deleteDocument(@NonNull String docId, @NonNull String rev);
 

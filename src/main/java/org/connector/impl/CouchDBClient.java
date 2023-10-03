@@ -22,23 +22,7 @@ import org.connector.api.ICouchClient;
 import org.connector.exceptions.CouchDBException;
 import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
-import org.connector.model.BulkGetRequest;
-import org.connector.model.BulkGetResponse;
-import org.connector.model.BulkSaveRequest;
-import org.connector.model.BulkSaveResponse;
-import org.connector.model.CouchQueryViewResponse;
-import org.connector.model.CreateIndexRequest;
-import org.connector.model.CreateIndexResponse;
-import org.connector.model.Document;
-import org.connector.model.FindRequest;
-import org.connector.model.FindResponse;
-import org.connector.model.GetAllDocsResponse;
-import org.connector.model.GetDatabaseInfoResponse;
-import org.connector.model.GetIndexResponse;
-import org.connector.model.GetPartitionResponse;
-import org.connector.model.PurgeResponse;
-import org.connector.model.SaveResponse;
-import org.connector.model.ViewRequest;
+import org.connector.model.*;
 import org.connector.util.ConnectorFunction;
 import org.connector.util.JSON;
 import org.springframework.lang.NonNull;
@@ -228,7 +212,7 @@ public class CouchDBClient implements ICouchClient {
     public Boolean createView(ViewRequest viewRequest, String designDoc) {
         var uri = getURI(baseURI, database,"_design", designDoc);
         var code = put(uri, toJson(viewRequest), r -> r.getStatusLine().getStatusCode());
-        return 202 == code;
+        return 201 == code || 202 == code;
     }
 
     public ViewRequest getView(String designDoc) {
@@ -365,8 +349,6 @@ public class CouchDBClient implements ICouchClient {
         return JSON.fromJson(rawJsonResponse, clazz);
     }
 
-
-
     @Override
     public <T extends Document> T getDocumentById(@NonNull String docId, boolean revs, Class<T> clazz) {
         var uri = getURI(baseURI, List.of(database, docId), List.of(asPair("revs", String.valueOf(revs))));
@@ -410,15 +392,21 @@ public class CouchDBClient implements ICouchClient {
     }
 
     @Override
-    public SaveResponse saveAttachment(@NonNull InputStream bytesIn, String name, String contentType) {
-        var uri = getURI(baseURI, database, name);
+    public SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev) {
+        var uri = getURI(baseURI, List.of(database, docId, name), List.of(asPair("rev", rev)));
         return put(uri, bytesIn, contentType);
     }
 
     @Override
-    public SaveResponse saveAttachment(InputStream bytesIn, String name, String contentType, String docId, String rev) {
+    public InputStream getAttachment(String name, String docId) {
         var uri = getURI(baseURI, database, docId, name);
-        return put(uri, bytesIn, contentType);
+        return get(uri);
+    }
+
+    @Override
+    public InputStream getAttachment(String name, String docId, String rev) {
+        var uri = getURI(baseURI, List.of(database, docId, name), List.of(asPair("rev", rev)));
+        return get(uri);
     }
 
     @Override
@@ -492,6 +480,21 @@ public class CouchDBClient implements ICouchClient {
             get.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
             response.set(execute(get));
             return wrapEx(responseProcessor).apply(response.get());
+        }
+    }
+
+    private InputStream get(URI uri) {
+        HttpGet get = new HttpGet(uri);
+        get.addHeader("Accept", "application/json");
+        return get(get);
+    }
+
+    private InputStream get(HttpGet httpGet) {
+        HttpResponse response = execute(httpGet);
+        try {
+            return response.getEntity().getContent();
+        } catch (Exception e) {
+            throw new CouchDBException("Error reading response. ", e);
         }
     }
 

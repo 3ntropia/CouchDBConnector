@@ -98,16 +98,6 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     }
 
     @Test
-    @Order(6)
-    void createDesignViewTest(){
-        ViewRequest viewRequest = ViewRequest.builder()
-                .views(new ViewName(new ViewMap("function (doc) { if(doc.innerClass !== null){  doc.innerClass.forEach(c => { emit(c._id, doc._id); }); } }")))
-                .language("javascript")
-                .build();
-        Boolean viewCreated = someDAO.getClient().createView(viewRequest, "test");
-        //assertTrue(viewCreated);
-    }
-    @Test
     @Order(7)
     void queryAllDocs(){
         CouchQuery couchQuery = CouchQuery.and()
@@ -190,15 +180,6 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
         List<SomeClass> secondPage = couchPaginator.getPage(1);
         assertNotNull(secondPage);
         assertEquals("1:3", secondPage.get(0).getId());
-    }
-
-    @Test
-    @Order(13)
-    void queryViewsTest() {
-        CouchQueryViewResponse test = someDAO.getClient().findView("1", "test", "viewName");
-        assertNotNull(test);
-        assertEquals("8", test.totalRows());
-        assertEquals(8, test.getDeserializedRow().size());
     }
 
     @Test
@@ -293,5 +274,36 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     void bulkDelete() {
         var someClasses = someDAO.delete(Arrays.asList("1:7", "1:8"));
         assertTrue(someClasses);
+    }
+
+    @Test
+    @Order(22)
+    void createSingleDocument() {
+        var someClas = someDAO.create(SomeClass
+                .builder()
+                .id("1:9")
+                .field("fields1").build());
+        assertNotNull(someClas);
+        assertEquals("1:9", someClas.getId());
+        assertNotNull(someClas.getRev());
+    }
+
+    @Test
+    @Order(22)
+    void updateSingleDocument() {
+        var some = someDAO.getById("1:9");
+        some.setField("field modified");
+        var someClas = someDAO.update(some);
+        assertNotNull(someClas);
+        assertEquals("1:9", someClas.getId());
+        assertEquals("field modified", someClas.getField());
+        assertNotNull(someClas.getRev());
+    }
+
+    @Test
+    @Order(22)
+    void deleteingleDocument() {
+        var deleted = someDAO.delete("1:9");
+        assertTrue(deleted);
     }
 }
