@@ -289,7 +289,7 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     }
 
     @Test
-    @Order(22)
+    @Order(23)
     void updateSingleDocument() {
         var some = someDAO.getById("1:9");
         some.setField("field modified");
@@ -301,7 +301,7 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     }
 
     @Test
-    @Order(22)
+    @Order(24)
     void deleteingleDocument() {
         var deleted = someDAO.delete("1:9");
         assertTrue(deleted);
