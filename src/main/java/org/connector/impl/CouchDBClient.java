@@ -220,10 +220,10 @@ public class CouchDBClient extends HTTPHandler implements ICouchClient {
     }
 
     @Override
-    public <T extends Document> FindResponse<T> find(FindRequest request, Class<T> clazz) {
-        var uri = isBlank(request.partition())
+    public <T extends Document> FindResponse<T> find(FindRequest request, Class<T> clazz, String partition) {
+        var uri = isBlank(partition)
                 ? getURI(baseURI, database, COUCH_FIND_PATH)
-                : getURI(baseURI, database, COUCH_PARTITION_PATH, request.partition(), COUCH_FIND_PATH);
+                : getURI(baseURI, database, COUCH_PARTITION_PATH, partition, COUCH_FIND_PATH);
         var findType = JSON.getParameterizedType(FindResponse.class, clazz);
         // TODO: 12/7/22 handle pagination and max bulk get request value, handle overflow too
         var rawJsonResponse = post(uri, toJson(request), this::mapResponseToJsonString);

@@ -25,9 +25,9 @@ public interface ICouchDAO<T extends Document> {
 
     boolean delete(List<String> id);
 
-    <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz);
+    <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz, String partition);
 
     List<T> find(CouchQuery query);
 
-    CouchFindResult<T> getCouchFindResult(FindRequest query);
+    CouchFindResult<T> getCouchFindResult(FindRequest query, String partition);
 }

@@ -134,7 +134,7 @@ public class CouchDBClientTest extends AbstractCouchDAOTest{
         SaveResponse response = couchDbClient.saveDocument(foo);
 
         Foo foo2 = couchDbClient.getDocumentById(foo.getId(), Foo.class);
-        String base64Data = foo2.getAttachments().get("txt_1.txt").getData();
+        String base64Data = foo2.getAttachments().get("txt_1.txt").getContentType();
         assertNotNull(base64Data);
     }
 

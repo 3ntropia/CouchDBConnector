@@ -38,8 +38,4 @@ public class Attachment {
 	public static Attachment withDataContent(String data, String contentType) {
 		return new Attachment(data, contentType, 0, "", 0L, false);
 	}
-
-	public static Attachment empty() {
-		return new Attachment("", "", 0, "", 0L, false);
-	}
 }

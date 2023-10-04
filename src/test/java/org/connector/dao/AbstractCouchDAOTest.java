@@ -112,9 +112,8 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
                 .selector("{\"extraField\":\"Extra\"}")
                 .limit(2)
                 //.sort("{\"document.extraField\":\"ASC\"}")
-                .partition("1")
                 .build();
-        List<SomeClass> test = someDAO.find(couchQueryRequest);
+        List<SomeClass> test = someDAO.find(couchQueryRequest, "1");
         assertNotNull(test);
         assertEquals(test.get(0).getField(), "test field2");
     }
@@ -125,9 +124,8 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
         var couchQueryRequest = FindRequest.builder()
                 .selector("{\"extraField\":\"Extra\"}")
                 .fields(Collections.singletonList("field"))
-                .partition("1")
                 .build();
-        List<ExtraClass> test2 = someDAO.findBySubClass(couchQueryRequest, ExtraClass.class);
+        List<ExtraClass> test2 = someDAO.findBySubClass(couchQueryRequest, ExtraClass.class, "1");
         assertNotNull(test2);
         assertEquals("test field2", test2.get(0).getField());
     }
@@ -300,9 +298,8 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     void queryCouchQueryRegexRequest() {
         var regexQuery = FindRequest.builder()
                 .selector("{\"extraField\": {\"$regex\": \"^exx\"}}")
-                .partition("2")
                 .build();
-        List<SomeClass> test2 = someDAO.find(regexQuery);
+        List<SomeClass> test2 = someDAO.find(regexQuery, "1");
         assertNotNull(test2);
         assertEquals("test field3", test2.get(0).getField());
     }

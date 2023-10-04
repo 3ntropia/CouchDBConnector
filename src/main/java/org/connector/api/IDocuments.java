@@ -20,7 +20,7 @@ public interface IDocuments {
 
     <T extends Document> T getDocumentByIdWithAttachments(@NonNull String docId, boolean attachments,Class<T> clazz);
 
-    <T extends Document> FindResponse<T> find(FindRequest request, Class<T> clazz);
+    <T extends Document> FindResponse<T> find(FindRequest request, Class<T> clazz, String partition);
 
     SaveResponse saveDocument(Document doc);
     SaveResponse saveDocument(@NonNull String docId, Document doc);

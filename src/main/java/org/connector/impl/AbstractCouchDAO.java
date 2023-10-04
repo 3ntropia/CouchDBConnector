@@ -109,8 +109,8 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
      * for some requests related to the minimal fields you are expecting.
      */
     @Override
-    public <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz) {
-        var findResponse = this.client.find(findRequest, clazz);
+    public <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz, String partition) {
+        var findResponse = this.client.find(findRequest, clazz, partition);
         return new ArrayList<>(findResponse.docs());
     }
 
@@ -120,8 +120,8 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
     }
 
     @Override
-    public CouchFindResult<T> getCouchFindResult(FindRequest query) {
-        var response = this.client.find(query, entityClass);
+    public CouchFindResult<T> getCouchFindResult(FindRequest query, String partition) {
+        var response = this.client.find(query, entityClass, partition);
         return new CouchFindResult<>(unwrapFindResponse(response), response.bookmark());
     }
 
@@ -130,7 +130,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
                 .selector(c.toString())
                 .limit(pageSize)
                 .bookmark(bookmark)
-                .build());
+                .build(), c.getPartition());
     }
 
     CouchFindResult<T> getCouchFindResult(CouchQuery c, int pageSize, String bookmark, int page) {
@@ -139,7 +139,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
                 .limit(pageSize)
                 .skip(pageSize * page)
                 .bookmark(bookmark)
-                .build());
+                .build(), c.getPartition());
     }
 
     List<T> unwrapFindResponse(FindResponse<T> findResponse) {

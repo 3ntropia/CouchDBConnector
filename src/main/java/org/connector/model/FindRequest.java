@@ -19,7 +19,6 @@ public record FindRequest(
         @JsonRawValue String sort,
         List<String> fields,
         @JsonProperty("use_index") List<String> indexes,
-        String partition,
         String view,
         String filter,
         String bookmark) {
