@@ -32,6 +32,8 @@ public interface IdbOps {
 
     Boolean createView(ViewRequest viewRequest, String designDoc);
 
+    ViewRequest getView(String designDoc);
+
     String getInstanceMetaInfo();
 
     List<String> getAllDbs();

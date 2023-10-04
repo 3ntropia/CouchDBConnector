@@ -1,7 +1,6 @@
 package org.connector.impl;
 
 import org.connector.api.ICouchDAO;
-import org.connector.api.IDocuments;
 import org.connector.model.BulkGetRequest;
 import org.connector.model.BulkGetResponse;
 import org.connector.model.BulkSaveRequest;
@@ -12,8 +11,6 @@ import org.connector.model.FindResponse;
 import org.connector.query.CouchQuery;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +20,6 @@ import java.util.stream.Collectors;
  * @param <T> - the type of the items to be persisted in this DAO
  */
 public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO<T> {
-
-    /**
-     * Type used for deserialization. Built once and cached per DAO
-     */
-    //private final JavaType type;
 
     /**
      * The CouchDB client class that interacts over HTTP(S) with CouchDB
@@ -118,7 +110,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
      */
     @Override
     public <X extends Document> List<X> findBySubClass(FindRequest findRequest, Class<X> clazz) {
-        var findResponse = this.client.find(findRequest, "", clazz);
+        var findResponse = this.client.find(findRequest, clazz);
         return new ArrayList<>(findResponse.docs());
     }
 
@@ -128,8 +120,8 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
     }
 
     @Override
-    public CouchFindResult<T> getCouchFindResult(FindRequest query, String partition) {
-        var response = this.client.find(query, partition, entityClass);
+    public CouchFindResult<T> getCouchFindResult(FindRequest query) {
+        var response = this.client.find(query, entityClass);
         return new CouchFindResult<>(unwrapFindResponse(response), response.bookmark());
     }
 
@@ -138,7 +130,7 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
                 .selector(c.toString())
                 .limit(pageSize)
                 .bookmark(bookmark)
-                .build(), c.getPartition());
+                .build());
     }
 
     CouchFindResult<T> getCouchFindResult(CouchQuery c, int pageSize, String bookmark, int page) {
@@ -147,10 +139,10 @@ public abstract class AbstractCouchDAO <T extends Document> implements ICouchDAO
                 .limit(pageSize)
                 .skip(pageSize * page)
                 .bookmark(bookmark)
-                .build(), c.getPartition());
+                .build());
     }
 
-    protected List<T> unwrapFindResponse(FindResponse<T> findResponse) {
+    List<T> unwrapFindResponse(FindResponse<T> findResponse) {
         return new ArrayList<>(findResponse.docs());
     }
 

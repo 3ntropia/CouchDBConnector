@@ -29,5 +29,5 @@ public interface ICouchDAO<T extends Document> {
 
     List<T> find(CouchQuery query);
 
-    CouchFindResult<T> getCouchFindResult(FindRequest query, String partition);
+    CouchFindResult<T> getCouchFindResult(FindRequest query);
 }

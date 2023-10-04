@@ -1,48 +1,26 @@
 package org.connector.impl;
 
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.connector.api.ICouchClient;
 import org.connector.exceptions.CouchDBException;
-import org.connector.http.AutoCloseableHttpResponse;
 import org.connector.http.CouchHttpHeaders;
 import org.connector.model.*;
-import org.connector.util.ConnectorFunction;
 import org.connector.util.JSON;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.connector.query.IntegrationConstants.*;
-import static org.connector.util.ConnectorFunction.wrapEx;
 import static org.connector.util.JSON.toJson;
 
 /**
@@ -52,19 +30,17 @@ import static org.connector.util.JSON.toJson;
  * Interfaces are provided for encapsulation purposes.
  *
  */
-public class CouchDBClient implements ICouchClient {
+public class CouchDBClient extends HTTPHandler implements ICouchClient {
 
     private final URI baseURI;
     private final String database;
-    private final HttpHost httpHost;
-    private final HttpContext httpContext;
-    private final HttpClient httpClient;
     private final boolean isPartitioned;
     private final int bulkMaxSize; //todo use to implement in find requests.
 
     public CouchDBClient(@NonNull URI uri, @NonNull String database, @NonNull HttpHost host,
                          @NonNull HttpContext context, @NonNull HttpClient client, boolean createDatabase,
                          boolean defaultPartitioned, int bulkMaxSize, boolean testConnection) {
+        super(host, context, client);
         Assert.notNull(uri, "URI (protocol, host, port) cannot be null");
         Assert.hasText(database, "database name must be provided.");
         Assert.notNull(host, "HTTP Host must not be null.");
@@ -73,9 +49,6 @@ public class CouchDBClient implements ICouchClient {
                 "BulkMaxSize must be greaterEq than 10 and lesserEq than 100000.");
         this.baseURI = uri;
         this.database = database;
-        this.httpHost = host;
-        this.httpContext = context;
-        this.httpClient = client;
         this.bulkMaxSize = bulkMaxSize;
         this.isPartitioned = defaultPartitioned;
 
@@ -119,8 +92,7 @@ public class CouchDBClient implements ICouchClient {
 
     @Override
     public int deleteDatabase(@NonNull String databaseName) {
-        var sc = delete(getURI(baseURI, databaseName), r -> r.getStatusLine().getStatusCode());
-        return sc;
+        return delete(getURI(baseURI, databaseName), r -> r.getStatusLine().getStatusCode());
     }
 
     @Override
@@ -134,8 +106,7 @@ public class CouchDBClient implements ICouchClient {
         var uri = isPartitioned
                 ? getURI(dbURI, List.of(asPair("partitioned", "true")))
                 : dbURI;
-        var sc = put(uri, "", r -> r.getStatusLine().getStatusCode());
-        return sc;
+        return put(uri, "", r -> r.getStatusLine().getStatusCode());
     }
 
     @Override
@@ -249,10 +220,10 @@ public class CouchDBClient implements ICouchClient {
     }
 
     @Override
-    public <T extends Document> FindResponse<T> find(FindRequest request, String partition, Class<T> clazz) {
-        var uri = isBlank(partition)
+    public <T extends Document> FindResponse<T> find(FindRequest request, Class<T> clazz) {
+        var uri = isBlank(request.partition())
                 ? getURI(baseURI, database, COUCH_FIND_PATH)
-                : getURI(baseURI, database, COUCH_PARTITION_PATH, partition, COUCH_FIND_PATH);
+                : getURI(baseURI, database, COUCH_PARTITION_PATH, request.partition(), COUCH_FIND_PATH);
         var findType = JSON.getParameterizedType(FindResponse.class, clazz);
         // TODO: 12/7/22 handle pagination and max bulk get request value, handle overflow too
         var rawJsonResponse = post(uri, toJson(request), this::mapResponseToJsonString);
@@ -321,11 +292,6 @@ public class CouchDBClient implements ICouchClient {
         }
         return get(uri, response -> JSON.readValue(response.getEntity().getContent(), CouchQueryViewResponse.class));
     }
-
-    private String encodeValue(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
-    }
-
 
     @Override
     public CouchHttpHeaders getDocumentInfo(@NonNull String docId) {
@@ -431,144 +397,9 @@ public class CouchDBClient implements ICouchClient {
         return getDesignDocView(designDocName, viewName, partition, Map.of("starKey", starKey, "endKey", endKey));
     }
 
-    private String mapResponseToJsonString(HttpResponse response) {
-        return ofNullable(response)
-                .flatMap(res -> ofNullable(res.getEntity()))
-                .map(entity -> {
-                    try {
-                        return EntityUtils.toString(entity, StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        throw new CouchDBException("Error parsing response", e);
-                    }
-                }).orElse("");
-    }
-
-    private @NonNull URI getURI(@NonNull URI base, String... pathSegments) {
-        try {
-            return new URIBuilder(base).setPathSegments(pathSegments).build();
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private @NonNull URI getURI(@NonNull URI base, @NonNull List<NameValuePair> parameters) {
-        try {
-            return new URIBuilder(base).addParameters(parameters).build();
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private @NonNull URI getURI(@NonNull URI base, @NonNull List<String> pathSegments,
-                                @NonNull List<NameValuePair> parameters) {
-        try {
-            return new URIBuilder(base).setPathSegments(pathSegments).addParameters(parameters).build();
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     @Override
     public @NonNull URI getPartitionURI(@NonNull String dbName, @NonNull String partition) {
         return getURI(baseURI, dbName, COUCH_PARTITION_PATH, partition);
-    }
-
-    private <T> T get(@NonNull URI uri,
-                      @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            var get = new HttpGet(uri);
-            get.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-            response.set(execute(get));
-            return wrapEx(responseProcessor).apply(response.get());
-        }
-    }
-
-    private InputStream get(URI uri) {
-        HttpGet get = new HttpGet(uri);
-        get.addHeader("Accept", "application/json");
-        return get(get);
-    }
-
-    private InputStream get(HttpGet httpGet) {
-        HttpResponse response = execute(httpGet);
-        try {
-            return response.getEntity().getContent();
-        } catch (Exception e) {
-            throw new CouchDBException("Error reading response. ", e);
-        }
-    }
-
-    private <T> T post(@NonNull URI uri, @NonNull String json,
-                       @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            final var post = new HttpPost(uri);
-            var entity = new StringEntity(json, "UTF-8");
-            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-            post.setEntity(entity);
-            response.set(execute(post));
-            return wrapEx(responseProcessor).apply(response.get());
-        }
-    }
-
-    private <T> T put(@NonNull URI uri, @NonNull String json,
-                      @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            final var put = new HttpPut(uri);
-            var entity = new StringEntity(json, "UTF-8");
-            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-            put.setEntity(entity);
-            response.set(execute(put));
-            return wrapEx(responseProcessor).apply(response.get());
-        }
-    }
-
-    private SaveResponse put(URI uri, InputStream instream, String contentType) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            final HttpPut put = new HttpPut(uri);
-            final InputStreamEntity entity = new InputStreamEntity(instream, -1);
-            entity.setContentType(contentType);
-            put.setEntity(entity);
-            response.set(execute(put));
-            return JSON.readValue(response.get().getEntity().getContent(), SaveResponse.class);
-        } catch (Exception e) {
-            throw new CouchDBException(e);
-        }
-    }
-
-    private <T> T delete(@NonNull URI uri,
-                         @NonNull ConnectorFunction<HttpResponse, T, ? extends Exception> responseProcessor) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            final var delete = new HttpDelete(uri);
-            delete.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
-            response.set(execute(delete));
-            return wrapEx(responseProcessor).apply(response.get());
-        }
-    }
-
-    private CouchHttpHeaders head(@NonNull URI uri) {
-        try (var response = new AutoCloseableHttpResponse()) {
-            final var head = new HttpHead(uri);
-            response.set(execute(head));
-            var headers = Arrays.stream(response.get().getAllHeaders())
-                    .collect(Collectors.toMap(
-                            NameValuePair::getName,
-                            NameValuePair::getValue
-                    ));
-            return CouchHttpHeaders.of(headers);
-        }
-    }
-
-    private @NonNull HttpResponse execute(@NonNull HttpRequestBase request) {
-        try {
-            return httpClient.execute(httpHost, request, httpContext);
-        } catch (IOException e) {
-            request.abort();
-            throw new CouchDBException(e);
-        }
-    }
-
-    private static NameValuePair asPair(String key, String value) {
-        return new BasicNameValuePair(key, value);
     }
 
 
