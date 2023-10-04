@@ -3,13 +3,9 @@ package org.connector.dao;
 
 import org.connector.dao.query.entities.*;
 import org.connector.impl.CouchPaginator;
-import org.connector.model.CouchQueryViewResponse;
 import org.connector.model.CreateIndexRequest;
 import org.connector.model.FindRequest;
 import org.connector.model.IndexDefinition;
-import org.connector.model.ViewMap;
-import org.connector.model.ViewName;
-import org.connector.model.ViewRequest;
 import org.connector.query.CouchQuery;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -113,35 +109,27 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     @Order(8)
     void queryCouchQueryRequest(){
         var couchQueryRequest = FindRequest.builder()
-                .selector("{\"extraField\":\"extra\"}")
+                .selector("{\"extraField\":\"Extra\"}")
                 .limit(2)
                 //.sort("{\"document.extraField\":\"ASC\"}")
                 .partition("1")
                 .build();
-        List<SomeClass> test = someDAO.find(couchQueryRequest, "");
+        List<SomeClass> test = someDAO.find(couchQueryRequest);
         assertNotNull(test);
-        assertEquals(test.get(0).getField(), "test field");
-
-        var regexQuery = FindRequest.builder()
-                .selector("{\"extraField\": {\"$regex\": \"^exx\"}}")
-                .partition("1")
-                .build();
-        List<SomeClass> test2 = someDAO.find(regexQuery, "");
-        assertNotNull(test2);
-        assertEquals("test field3", test2.get(0).getField());
+        assertEquals(test.get(0).getField(), "test field2");
     }
 
     @Test
     @Order(9)
     void querySubClass() {
         var couchQueryRequest = FindRequest.builder()
-                .selector("{\"extraField\":\"extra\"}")
+                .selector("{\"extraField\":\"Extra\"}")
                 .fields(Collections.singletonList("field"))
                 .partition("1")
                 .build();
         List<ExtraClass> test2 = someDAO.findBySubClass(couchQueryRequest, ExtraClass.class);
         assertNotNull(test2);
-        assertEquals("test field", test2.get(0).getField());
+        assertEquals("test field2", test2.get(0).getField());
     }
 
     @Test
@@ -305,5 +293,17 @@ class AbstractCouchDAOTest extends AbstractCouchDbIntegrationTest {
     void deleteingleDocument() {
         var deleted = someDAO.delete("1:9");
         assertTrue(deleted);
+    }
+
+    @Test
+    @Order(38)
+    void queryCouchQueryRegexRequest() {
+        var regexQuery = FindRequest.builder()
+                .selector("{\"extraField\": {\"$regex\": \"^exx\"}}")
+                .partition("2")
+                .build();
+        List<SomeClass> test2 = someDAO.find(regexQuery);
+        assertNotNull(test2);
+        assertEquals("test field3", test2.get(0).getField());
     }
 }

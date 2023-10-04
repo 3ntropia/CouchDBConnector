@@ -13,8 +13,8 @@ public class SomeDAO extends AbstractCouchDAO<SomeClass> {
         super(client, SomeClass.class);
     }
 
-    public List<SomeClass> find(FindRequest request, String partition) {
-        return new ArrayList<>(this.client.find(request, partition, this.entityClass).docs());
+    public List<SomeClass> find(FindRequest request) {
+        return new ArrayList<>(this.client.find(request, this.entityClass).docs());
     }
 
 }

@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfEnvironmentVariable(named = "INTEGRATION_DB", matches = "true")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
+public class CouchDBClientTest extends AbstractCouchDAOTest{
 
     private final Map<String, Attachment> attachmentMap = new HashMap<>();
 
     @Test
-    @Order(1)
+    @Order(25)
     void createDesignViewTest(){
         ViewRequest viewRequest = ViewRequest.builder()
                 .views(new ViewName(new ViewMap("function (doc) { if(doc.innerClass !== null){  doc.innerClass.forEach(c => { emit(c._id, doc._id); }); } }")))
@@ -38,7 +38,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
-    @Order(2)
+    @Order(26)
     void queryViewsTest() {
         CouchQueryViewResponse test = couchDbClient.findView("1", "test", "viewName");
         assertNotNull(test);
@@ -48,6 +48,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
 
 
     @Test
+    @Order(27)
     void queryByCouchClienteId() {
         var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
         assertNotNull(fooClass);
@@ -55,6 +56,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(28)
     void queryByCouchClienteIdRev() {
         var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
         var fooClassRev = couchDbClient.getDocumentByRev("1:1", fooClass.getRev(), Foo.class);
@@ -63,6 +65,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(29)
     void updateSpecificRevision() {
         var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
         var fooClassRev = couchDbClient.getDocumentByRev("1:1", fooClass.getRev(), Foo.class);
@@ -73,6 +76,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(30)
     void updateAnyRevision() {
         var fooClass = couchDbClient.getDocumentById("1:1", Foo.class);
         fooClass.setType("added type 3");
@@ -83,6 +87,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(31)
     void queryByCouchClienteIdRevivions() {
         var fooClass = couchDbClient.getDocumentById("1:1", SomeClass.class);
         fooClass.setField("modified");
@@ -93,6 +98,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(32)
     void fetchLightDocumentDownCasting() {
         var lightSomeClass = couchDbClient.getDocumentById("1:4", LightSomeClass.class);
         assertNotNull(lightSomeClass);
@@ -101,12 +107,13 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(33)
     public void attachmentInline() {
         Attachment attachment1 = Attachment.withDataContent("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=", "text/plain");
 
         Attachment attachment2 = Attachment.withDataContent(Base64.encodeBase64String("binary string".getBytes()), "text/plain");
 
-        Foo bar = new Foo("2:1"); // Bar extends Document
+        Foo bar = new Foo("2:1");
 
         attachmentMap.put("txt_1.txt", attachment1);
         attachmentMap.put("txt_2.txt", attachment2);
@@ -117,21 +124,22 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
 
 
     @Test
+    @Order(34)
     public void attachmentInline_getWithDocument() {
         Attachment attachment = Attachment.withDataContent("VGhpcyBpcyBhIGJhc2U2NCBlbmNvZGVkIHRleHQ=", "text/plain");
         Map<String, Attachment> attachmentMap = new HashMap<>();
         attachmentMap.put("txt_1.txt", attachment);
         Foo foo = new Foo("2:5");
         foo.setAttachments(attachmentMap);
-
         SaveResponse response = couchDbClient.saveDocument(foo);
 
-        Foo foo2 = couchDbClient.getDocumentById(response.id(), Foo.class);
+        Foo foo2 = couchDbClient.getDocumentById(foo.getId(), Foo.class);
         String base64Data = foo2.getAttachments().get("txt_1.txt").getData();
         assertNotNull(base64Data);
     }
 
     @Test
+    @Order(35)
     public void standaloneAttachment_docIdContainSpecialChar() {
         byte[] bytesToDB = "binary data".getBytes();
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesToDB);
@@ -147,6 +155,7 @@ public class CouchDBClientTest extends AbstractCouchDbIntegrationTest{
     }
 
     @Test
+    @Order(36)
     public void getAttachment() throws IOException {
 
         byte[] bytesToDB = "binary data".getBytes();

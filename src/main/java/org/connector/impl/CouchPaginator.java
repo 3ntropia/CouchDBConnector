@@ -1,5 +1,6 @@
 package org.connector.impl;
 
+import lombok.Getter;
 import org.connector.model.CouchFindResult;
 import org.connector.model.Document;
 import org.connector.query.CouchQuery;
@@ -10,8 +11,10 @@ import java.util.List;
 public class CouchPaginator<T extends Document> {
     private final AbstractCouchDAO<T> dao;
     private final CouchQuery query;
+    @Getter
     private int pageSize = 50;
     private String bookmark;
+    @Getter
     private int page = 0;
 
     public CouchPaginator(CouchQuery query, AbstractCouchDAO<T> dao) {
@@ -36,16 +39,8 @@ public class CouchPaginator<T extends Document> {
         return results.results();
     }
 
-    public int getPageSize() {
-        return pageSize;
-    }
-
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
-    }
-
-    public int getPage() {
-        return page;
     }
 
     public void setPage(int page) {
