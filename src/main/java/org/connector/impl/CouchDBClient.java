@@ -231,7 +231,7 @@ public class CouchDBClient extends HTTPHandler implements ICouchClient {
     }
 
     @Override
-    public <T extends Document> BulkGetResponse<T> bulkGet(BulkGetRequest request, Class<T> clazz) {
+    public <T extends Document> BulkGetResponse<T> bulkGet(@NonNull BulkGetRequest request,@NonNull Class<T> clazz) {
         var uri = getURI(baseURI, database, COUCH_BULK_GET_PATH);
         var type = JSON.getParameterizedType(BulkGetResponse.class, clazz);
         var rawJsonResponse = post(uri, toJson(request), this::mapResponseToJsonString);
@@ -253,7 +253,7 @@ public class CouchDBClient extends HTTPHandler implements ICouchClient {
     }
 
     @Override
-    public <T extends Document> List<T> bulkGetByIds(List<String> ids, Class<T> clazz) {
+    public <T extends Document> List<T> bulkGetByIds(@NonNull List<String> ids,@NonNull Class<T> clazz) {
         var bulkGetReq = new BulkGetRequest(ids);
         var response = bulkGet(bulkGetReq, clazz);
         if (response != null) {
@@ -266,7 +266,7 @@ public class CouchDBClient extends HTTPHandler implements ICouchClient {
     }
 
     @Override
-    public <T extends Document>  List<T> bulkGetByIds(Class<T> clazz, String... ids) {
+    public <T extends Document>  List<T> bulkGetByIds(@NonNull Class<T> clazz, String... ids) {
         return bulkGetByIds(Arrays.asList(ids), clazz);
     }
 
